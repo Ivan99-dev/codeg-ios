@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Export options for `scripts/release.sh --archive`. Consumed by
+  `xcodebuild -exportArchive`. `destination: export` writes a local .ipa; the
+  script then uploads it with `xcrun altool` only when App Store Connect API key
+  env vars are present. With no teamID here, Xcode uses the team that signed
+  the archive (configured locally or through CODEG_DEVELOPMENT_TEAM).
+-->
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>app-store-connect</string>
+    <key>destination</key>
+    <string>export</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>uploadSymbols</key>
+    <true/>
+</dict>
+</plist>
