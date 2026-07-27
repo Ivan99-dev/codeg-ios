@@ -68,6 +68,14 @@ enum AcpEvent: Hashable, Sendable, Decodable {
     case questionRequest(questionId: String, questions: [QuestionSpec])
     /// A pending question was resolved — clear the card.
     case questionResolved(questionId: String)
+    /// Grok's native `exit_plan_mode`: the agent finished planning and is BLOCKED
+    /// on the user's approval before it leaves plan mode and starts implementing.
+    /// Resolve via `acp_answer_plan_approval`; also carried on the session
+    /// snapshot so a mid-turn attach recovers it.
+    case planApprovalRequest(approvalId: String, toolCallId: String, planMarkdown: String)
+    /// A pending plan approval was answered (from any client) or canceled — clear
+    /// the card. Idempotent on apply.
+    case planApprovalResolved(approvalId: String)
     /// The agent's live plan / TODO list (display only; does not block the turn).
     case planUpdate(entries: [PlanEntry])
     case unknown(type: String)
@@ -78,6 +86,7 @@ enum AcpEvent: Hashable, Sendable, Decodable {
         case stopReason, sessionId, conversationId, folderId
         case used, size, messageId, blocks, message, code, textPreview
         case requestId, toolCall, options, questionId, questions, entries
+        case approvalId, planMarkdown
     }
 
     init(from decoder: Decoder) throws {
@@ -163,6 +172,16 @@ enum AcpEvent: Hashable, Sendable, Decodable {
             )
         case "question_resolved":
             self = .questionResolved(questionId: try c.decodeIfPresent(String.self, forKey: .questionId) ?? "")
+        case "plan_approval_request":
+            self = .planApprovalRequest(
+                approvalId: try c.decodeIfPresent(String.self, forKey: .approvalId) ?? "",
+                toolCallId: try c.decodeIfPresent(String.self, forKey: .toolCallId) ?? "",
+                // An empty/missing plan still opens the approval surface (Grok's
+                // plan-mode doc allows it) — the card shows an empty-state notice.
+                planMarkdown: try c.decodeIfPresent(String.self, forKey: .planMarkdown) ?? ""
+            )
+        case "plan_approval_resolved":
+            self = .planApprovalResolved(approvalId: try c.decodeIfPresent(String.self, forKey: .approvalId) ?? "")
         case "plan_update":
             self = .planUpdate(entries: try c.decodeIfPresent([PlanEntry].self, forKey: .entries) ?? [])
         default:
@@ -209,10 +228,11 @@ struct LiveSessionSnapshot: Sendable, Decodable {
     let activeToolCalls: [ToolCallStateSnapshot]?
     let pendingPermission: PendingPermissionSnapshot?
     let pendingQuestion: PendingQuestionSnapshot?
+    let pendingPlanApproval: PendingPlanApprovalSnapshot?
 
     private enum CodingKeys: String, CodingKey {
         case connectionId, conversationId, folderId, status, externalId, eventSeq
-        case liveMessage, activeToolCalls, pendingPermission, pendingQuestion
+        case liveMessage, activeToolCalls, pendingPermission, pendingQuestion, pendingPlanApproval
     }
 
     init(from decoder: Decoder) throws {
@@ -227,6 +247,7 @@ struct LiveSessionSnapshot: Sendable, Decodable {
         activeToolCalls = (try? c.decodeIfPresent([ToolCallStateSnapshot].self, forKey: .activeToolCalls)) ?? nil
         pendingPermission = (try? c.decodeIfPresent(PendingPermissionSnapshot.self, forKey: .pendingPermission)) ?? nil
         pendingQuestion = (try? c.decodeIfPresent(PendingQuestionSnapshot.self, forKey: .pendingQuestion)) ?? nil
+        pendingPlanApproval = (try? c.decodeIfPresent(PendingPlanApprovalSnapshot.self, forKey: .pendingPlanApproval)) ?? nil
     }
 }
 
@@ -337,6 +358,23 @@ struct PendingQuestionSnapshot: Sendable, Decodable {
     }
 }
 
+/// Pending Grok plan approval carried by a snapshot (Rust
+/// `PendingPlanApprovalState`), so a client attaching mid-turn recovers the
+/// blocked `exit_plan_mode` card instead of watching the turn spin.
+struct PendingPlanApprovalSnapshot: Sendable, Decodable {
+    let approvalId: String
+    let toolCallId: String
+    let planMarkdown: String
+
+    private enum CodingKeys: String, CodingKey { case approvalId, toolCallId, planMarkdown }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        approvalId = try c.decodeIfPresent(String.self, forKey: .approvalId) ?? ""
+        toolCallId = try c.decodeIfPresent(String.self, forKey: .toolCallId) ?? ""
+        planMarkdown = try c.decodeIfPresent(String.self, forKey: .planMarkdown) ?? ""
+    }
+}
+
 /// A registered agent on a server (Rust `AcpAgentInfo`). The structured per-type
 /// config detail round-trips most of these: `env` + `modelProviderId` via
 /// `acp_update_agent_env`, and the native config files (`configJson` and the
@@ -395,6 +433,12 @@ struct AcpAgentInfo: Decodable, Identifiable, Hashable, Sendable {
     /// `grok` parsed scalar settings (permission mode / reasoning effort) backing
     /// the structured controls — derived server-side from `grokConfigToml`.
     let grokSettings: GrokSettings?
+    /// `cursor` raw `~/.cursor/cli-config.json` (the Advanced escape-hatch editor
+    /// source). Shared with the Cursor CLI's own `/config` UI.
+    let cursorCliConfigJson: String?
+    /// `cursor` parsed scalar settings (sandbox mode / permission rules) backing
+    /// the structured controls — derived server-side from `cursorCliConfigJson`.
+    let cursorSettings: CursorSettings?
 
     var id: String { registryId }
 }
@@ -406,4 +450,24 @@ struct AcpAgentInfo: Decodable, Identifiable, Hashable, Sendable {
 struct GrokSettings: Decodable, Hashable, Sendable {
     let defaultReasoningEffort: String?
     let permissionMode: String?
+}
+
+/// The subset of `~/.cursor/cli-config.json` codeg manages, projected by the
+/// backend (`sandbox_mode` / `permissions_allow` / `permissions_deny` → camelCase
+/// here via the shared decoder). Everything else in the file is preserved
+/// verbatim on write, so this is a view, not the whole document. The rule lists
+/// default to empty rather than failing when the key is absent.
+struct CursorSettings: Decodable, Hashable, Sendable {
+    let sandboxMode: String?
+    let permissionsAllow: [String]
+    let permissionsDeny: [String]
+
+    private enum CodingKeys: String, CodingKey { case sandboxMode, permissionsAllow, permissionsDeny }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        sandboxMode = try c.decodeIfPresent(String.self, forKey: .sandboxMode)
+        permissionsAllow = try c.decodeIfPresent([String].self, forKey: .permissionsAllow) ?? []
+        permissionsDeny = try c.decodeIfPresent([String].self, forKey: .permissionsDeny) ?? []
+    }
 }

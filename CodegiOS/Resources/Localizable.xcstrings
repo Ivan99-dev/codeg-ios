@@ -1,6 +1,436 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Cursor Configuration" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor 配置"
+          }
+        }
+      }
+    },
+    "Both methods sign in to Cursor’s own backend — cursor-agent has no custom-endpoint support, so there is no API URL to set." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "两种方式都登录 Cursor 自己的后端——cursor-agent 不支持自定义接入点，因此无需填写 API 地址。"
+          }
+        }
+      }
+    },
+    "Authentication Method" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "认证方式"
+          }
+        }
+      }
+    },
+    "Cursor API Key" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor API 密钥"
+          }
+        }
+      }
+    },
+    "Sign in with your Cursor account in a terminal. No credential is stored here." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在终端中使用你的 Cursor 账号登录，此处不保存任何凭据。"
+          }
+        }
+      }
+    },
+    "A Cursor Dashboard account key for headless or server machines — an alternative to signing in." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "供无界面或服务器环境使用的 Cursor Dashboard 账号密钥，可替代浏览器登录。"
+          }
+        }
+      }
+    },
+    "Account" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账号"
+          }
+        }
+      }
+    },
+    "Create one in the Cursor Dashboard under Integrations." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可在 Cursor Dashboard 的 Integrations 中创建。"
+          }
+        }
+      }
+    },
+    "Sign in to load the model list." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录后才能加载模型列表。"
+          }
+        }
+      }
+    },
+    "cursor-agent isn’t installed" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未安装 cursor-agent"
+          }
+        }
+      }
+    },
+    "Not signed in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未登录"
+          }
+        }
+      }
+    },
+    "Signed in" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已登录"
+          }
+        }
+      }
+    },
+    "Run this on the machine hosting codeg, then refresh:" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在运行 codeg 的机器上执行以下命令，然后点击刷新："
+          }
+        }
+      }
+    },
+    "Passed to cursor-agent as its --model flag. Leave unset to use the account default." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作为 --model 参数传给 cursor-agent。留空则使用账号默认模型。"
+          }
+        }
+      }
+    },
+    "Default Model" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "默认模型"
+          }
+        }
+      }
+    },
+    "Account default" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账号默认"
+          }
+        }
+      }
+    },
+    "Loading models…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在加载模型…"
+          }
+        }
+      }
+    },
+    "Permissions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "权限"
+          }
+        }
+      }
+    },
+    "Rules and sandbox merge into ~/.cursor/cli-config.json, preserving keys the Cursor CLI wrote. Running sessions pick them up after a restart." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "规则与沙盒会合并进 ~/.cursor/cli-config.json，并保留 Cursor CLI 自己写入的其它键。运行中的会话需重启后生效。"
+          }
+        }
+      }
+    },
+    "Run Everything" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部放行"
+          }
+        }
+      }
+    },
+    "Cursor runs commands without asking. Deny rules below still apply." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor 执行命令时不再询问，下方的拒绝规则仍然生效。"
+          }
+        }
+      }
+    },
+    "Cursor asks before running commands." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cursor 执行命令前会先询问。"
+          }
+        }
+      }
+    },
+    "Sandbox" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沙盒"
+          }
+        }
+      }
+    },
+    "Disabled" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已禁用"
+          }
+        }
+      }
+    },
+    "Allow Rules" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许规则"
+          }
+        }
+      }
+    },
+    "Deny Rules" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拒绝规则"
+          }
+        }
+      }
+    },
+    "Add allow rule" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加允许规则"
+          }
+        }
+      }
+    },
+    "Add deny rule" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加拒绝规则"
+          }
+        }
+      }
+    },
+    "Enter your Cursor API key, or switch to Official Subscription." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请填写 Cursor API 密钥，或切换为官方订阅。"
+          }
+        }
+      }
+    },
+    "Compacting context…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在压缩上下文…"
+          }
+        }
+      }
+    },
+    "Context compacted" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上下文已压缩"
+          }
+        }
+      }
+    },
+    "Context compacted · %@ → %@ tokens" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上下文已压缩 · %1$@ → %2$@ tokens"
+          }
+        }
+      }
+    },
+    "Plan ready for review" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "计划已就绪，待确认"
+          }
+        }
+      }
+    },
+    "Approve to start building, or send notes to have the plan revised." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "批准后开始实施，或提交修改意见让其重新调整计划。"
+          }
+        }
+      }
+    },
+    "The agent didn’t include a plan." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该智能体没有给出计划内容。"
+          }
+        }
+      }
+    },
+    "What should change?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要修改什么？"
+          }
+        }
+      }
+    },
+    "Send Notes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "发送意见"
+          }
+        }
+      }
+    },
+    "Request Changes" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要求修改"
+          }
+        }
+      }
+    },
+    "Approve & Build" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "批准并实施"
+          }
+        }
+      }
+    },
+    "Abandon Plan" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放弃计划"
+          }
+        }
+      }
+    },
+    "Entered plan mode" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已进入计划模式"
+          }
+        }
+      }
+    },
+    "Plan ready" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "计划已就绪"
+          }
+        }
+      }
+    },
+    "Switched mode" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已切换模式"
+          }
+        }
+      }
+    },
     "Grok Configuration" : {
       "extractionState" : "manual",
       "localizations" : {

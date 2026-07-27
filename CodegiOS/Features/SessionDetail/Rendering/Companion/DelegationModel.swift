@@ -119,21 +119,27 @@ enum DelegationModel {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty { return nil }
 
-        var obj: [String: Any]?
+        var decoded: [String: Any]?
         if let any = ToolJSONFormat.parseAny(trimmed) {
             if let o = any as? [String: Any] {
-                obj = o
+                decoded = o
             } else if !(any is [Any]) {
                 // Top-level primitive (string / number / bool) — render directly.
                 return .outcome(text: scalarText(any), isError: forceError, childConversationId: nil)
             }
             // An array falls through to the embedded-object scan below.
         }
-        if obj == nil { obj = EmbeddedJSON.extractObject(trimmed) }
+        if decoded == nil { decoded = EmbeddedJSON.extractObject(trimmed) }
 
-        guard let obj else {
+        guard let parsed = decoded else {
             return .outcome(text: trimmed, isError: forceError, childConversationId: nil)
         }
+
+        // A host envelope around the MCP result — Codex's live wire sends
+        // `{result: <CallToolResult>, error: null}` — is peeled first, so the chain
+        // below only ever faces the result itself.
+        let peel = McpResultEnvelope.peel(parsed, isResolvable: isResolvableDelegateResult)
+        let obj = peel.obj
 
         // MCP `CallToolResult` envelope: `{ content, structuredContent?, isError? }`.
         if let content = obj["content"] as? [Any] {
@@ -155,9 +161,27 @@ enum DelegationModel {
             return applyOuterError(interpreted, force: forceError)
         }
 
+        // A host envelope that failed outright carries no result to render — its
+        // own error string is the whole story, and beats dumping the envelope JSON.
+        if let hostError = peel.hostError {
+            return .outcome(text: hostError, isError: true, childConversationId: nil)
+        }
+
         // Unrecognized JSON — pretty-print so we don't surface raw braces.
         let pretty = ToolJSONFormat.prettyPrint(obj) ?? trimmed
         return .outcome(text: "```json\n\(pretty)\n```", isError: forceError, childConversationId: nil)
+    }
+
+    /// Whether `obj` is already one of the shapes ``parseToolOutput`` reads — a
+    /// report (`status`), a legacy outcome (`kind`), or an MCP `CallToolResult`.
+    /// Stops the host-envelope peel at a result that itself happens to carry a
+    /// `result` key. (A child's arbitrary payload is guarded on the other side too:
+    /// the peel only ever descends INTO a real `CallToolResult`.)
+    static func isResolvableDelegateResult(_ obj: [String: Any]) -> Bool {
+        if obj["status"] is String { return true }
+        if obj["kind"] is String { return true }
+        if obj["content"] is [Any] { return true }
+        return obj["structuredContent"] is [String: Any]
     }
 
     /// Resolve the delegation card status. iOS-trimmed mirror of the web
@@ -187,10 +211,15 @@ enum DelegationModel {
             let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
             if trimmed.isEmpty { continue }
             if let obj = ToolJSONFormat.parseObject(trimmed) ?? EmbeddedJSON.extractObject(trimmed) {
-                if let sc = obj["structuredContent"] as? [String: Any], let id = sc["task_id"] as? String, !id.isEmpty {
+                // Peel Codex's live `{result, error}` wrapper so `structuredContent`
+                // is reachable; a bare `task_id` at this level already ends the walk.
+                let result = McpResultEnvelope.peel(obj) {
+                    $0["task_id"] is String || isResolvableDelegateResult($0)
+                }.obj
+                if let sc = result["structuredContent"] as? [String: Any], let id = sc["task_id"] as? String, !id.isEmpty {
                     return id
                 }
-                if let id = obj["task_id"] as? String, !id.isEmpty { return id }
+                if let id = result["task_id"] as? String, !id.isEmpty { return id }
             }
             if let m = Rx.capture(trimmed, #"task_id[=:]\s*"?([A-Za-z0-9][\w-]*)"?"#, groups: 1), !m[0].isEmpty {
                 return m[0]
@@ -322,7 +351,8 @@ extension DelegationModel {
         let raw = (output ?? errorText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if raw.isEmpty { return StatusReport() }
 
-        guard let obj = parseResultObject(raw) else {
+        let (parsed, hostError) = parseResultObject(raw)
+        guard let obj = parsed else {
             return StatusReport(status: textRunningStatus(raw), text: raw)
         }
         let contentText = firstContentText(obj)
@@ -346,7 +376,9 @@ extension DelegationModel {
                 durationMs: num(report, "duration_ms")
             )
         }
-        let fallbackText = contentText ?? raw
+        // A host envelope that failed outright carries no result to show, so its own
+        // error string beats dumping the envelope JSON.
+        let fallbackText = contentText ?? hostError ?? raw
         return StatusReport(status: textRunningStatus(fallbackText), text: fallbackText)
     }
 
@@ -355,7 +387,7 @@ extension DelegationModel {
     /// otherwise this is the single-report path.
     static func parseStatusReports(output: String?, errorText: String?) -> [StatusReport] {
         let raw = (output ?? errorText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        if !raw.isEmpty, let obj = parseResultObject(raw), let found = findTasksArray(obj),
+        if !raw.isEmpty, let obj = parseResultObject(raw).obj, let found = findTasksArray(obj),
            !found.tasks.isEmpty, found.tasks.contains(where: { isReport($0 as? [String: Any], trusted: found.trusted) }) {
             return found.tasks.map { reportFromObject(($0 as? [String: Any]) ?? [:]) }
         }
@@ -459,11 +491,33 @@ extension DelegationModel {
 
     /// Parse a result string into its envelope/report object, peeling one layer of
     /// double-encoding (JSON-of-JSON). An array / number yields nil (matches web).
-    private static func parseResultObject(_ raw: String) -> [String: Any]? {
-        guard let any = ToolJSONFormat.parseAny(raw) else { return EmbeddedJSON.extractObject(raw) }
-        if let o = any as? [String: Any] { return o }
-        if let s = any as? String { return ToolJSONFormat.parseObject(s) ?? EmbeddedJSON.extractObject(s) }
-        return nil
+    ///
+    /// The parsed object is then stripped of any host envelope around the MCP
+    /// result: codex's LIVE wire hands us `{result: <CallToolResult>, error: null}`,
+    /// which otherwise resolves to no report at all and paints the raw envelope JSON
+    /// into the card. (Codex's PERSISTED rollout carries the bare
+    /// `Wall time:…\nOutput:\n<json>` instead, which already parsed — so only the
+    /// live path was affected.)
+    private static func parseResultObject(_ raw: String) -> (obj: [String: Any]?, hostError: String?) {
+        func peeled(_ obj: [String: Any]?) -> (obj: [String: Any]?, hostError: String?) {
+            guard let obj else { return (nil, nil) }
+            let result = McpResultEnvelope.peel(obj, isResolvable: isResolvableStatusResult)
+            return (result.obj, result.hostError)
+        }
+        guard let any = ToolJSONFormat.parseAny(raw) else { return peeled(EmbeddedJSON.extractObject(raw)) }
+        if let o = any as? [String: Any] { return peeled(o) }
+        if let s = any as? String { return peeled(ToolJSONFormat.parseObject(s) ?? EmbeddedJSON.extractObject(s)) }
+        return (nil, nil)
+    }
+
+    /// Whether `obj` is already one of the shapes the status resolution reads — a
+    /// report, a batch, or an MCP content envelope. Stops the host-envelope peel at
+    /// a result that itself happens to carry a `result` key.
+    private static func isResolvableStatusResult(_ obj: [String: Any]) -> Bool {
+        if validStatus(obj) != nil { return true }
+        if obj["tasks"] is [Any] { return true }
+        if obj["content"] is [Any] { return true }
+        return obj["structuredContent"] is [String: Any]
     }
 
     private static func reportFromObject(_ report: [String: Any]) -> StatusReport {

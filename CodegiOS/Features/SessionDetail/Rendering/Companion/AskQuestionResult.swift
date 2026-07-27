@@ -122,8 +122,22 @@ enum AskQuestionParse {
 
     private static func parseOutcomeJSON(_ output: String) -> AskOutcome? {
         guard let top = ToolJSONFormat.parseObject(output) else { return nil }
-        let topIsEnvelope = (top["answers"] as? [Any]) != nil || CompanionJSON.bool(top["declined"]) != nil
-        guard let env = topIsEnvelope ? top : (top["structuredContent"] as? [String: Any]) else { return nil }
+        // Resolve an answer envelope from a record: the record itself when it
+        // carries `answers`/`declined`, otherwise its `structuredContent`.
+        func envelope(_ r: [String: Any]?) -> [String: Any]? {
+            guard let r else { return nil }
+            if (r["answers"] as? [Any]) != nil || CompanionJSON.bool(r["declined"]) != nil { return r }
+            return r["structuredContent"] as? [String: Any]
+        }
+        // Prefer the bare top-level shape (Claude / the history parser) first, so a
+        // valid top-level envelope is never shadowed by an unrelated `result` key.
+        // codex's live ACP path wraps the MCP result as `{result, error}`, where
+        // `result` is the CallToolResult — sometimes tagged again under an `Ok`
+        // serde variant — so fall through those layers when the top level yields
+        // nothing. Mirrors the web `ask-question.ts::parseOutcomeJson`.
+        let result = top["result"] as? [String: Any]
+        let resultOk = result.flatMap { ($0["Ok"] as? [String: Any]) ?? ($0["ok"] as? [String: Any]) }
+        guard let env = envelope(top) ?? envelope(result) ?? envelope(resultOk) else { return nil }
         let hasAnswers = (env["answers"] as? [Any]) != nil
         let declined = CompanionJSON.bool(env["declined"])
         if !hasAnswers && declined == nil { return nil }

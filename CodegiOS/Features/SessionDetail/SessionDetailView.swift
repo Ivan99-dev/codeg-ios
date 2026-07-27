@@ -147,6 +147,9 @@ struct SessionDetailView: View {
         .sensoryFeedback(trigger: model.pendingQuestion?.questionId) { _, new in
             new != nil ? .warning : nil
         }
+        .sensoryFeedback(trigger: model.pendingPlanApproval?.approvalId) { _, new in
+            new != nil ? .warning : nil
+        }
         .sensoryFeedback(.selection, trigger: model.userToggleTick)
     }
 
@@ -239,6 +242,14 @@ struct SessionDetailView: View {
                     .transition(.opacity)
                     .zIndex(2)
                 }
+                if let approval = model.pendingPlanApproval {
+                    PlanApprovalCard(pending: approval) { decision, feedback in
+                        await model.answerPlanApproval(decision: decision, feedback: feedback)
+                    }
+                    .id(approval.approvalId)
+                    .transition(.opacity)
+                    .zIndex(2)
+                }
                 if !model.isPinnedToBottom {
                     JumpToLatestButton { model.userTappedScrollToBottom() }
                         .padding(.bottom, 10)
@@ -268,6 +279,7 @@ struct SessionDetailView: View {
             .animation(.snappy(duration: 0.24), value: model.isPinnedToBottom)
             .animation(.snappy(duration: 0.26), value: model.pendingPermission?.id)
             .animation(.snappy(duration: 0.26), value: model.pendingQuestion?.id)
+            .animation(.snappy(duration: 0.26), value: model.pendingPlanApproval?.id)
         }
     }
 }

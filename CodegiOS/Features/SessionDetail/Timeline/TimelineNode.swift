@@ -37,6 +37,9 @@ struct TimelineNode: Identifiable {
         case delegationStatusGroup([ToolCallVM])
         case taskGroup([ToolCallVM])
         case image(ImageData, caption: String?)
+        /// A context-compaction boundary — rendered as a chrome-less divider, not
+        /// a card. Token counts are Grok-only (codex sends none).
+        case compaction(before: Int?, after: Int?, running: Bool)
         case footer(MessageTurn, questionID: String?)
         case plan([PlanEntry], streaming: Bool)
         case thinking
@@ -63,6 +66,7 @@ struct TimelineNode: Identifiable {
             let state: ToolCallState = running ? .running : (ops.contains(where: \.isError) ? .error : .done)
             return .tool(icon: "checklist", state: state)
         case .image: return .image
+        case .compaction: return .compaction
         case .footer: return .footer
         case .plan: return .plan
         case .thinking: return .thinking
@@ -227,6 +231,10 @@ enum TranscriptTimeline {
             return TimelineNode(id: gid, content: .taskGroup(ops), agent: agent)
         case .image(let img, let cap):
             return TimelineNode(id: base, content: .image(img, caption: cap), agent: agent)
+        case .compaction(let before, let after, let running):
+            return TimelineNode(id: base,
+                                content: .compaction(before: before, after: after, running: running),
+                                agent: agent)
         case .unknown(let type):
             return TimelineNode(id: base, content: .unsupported(type), agent: agent)
         }

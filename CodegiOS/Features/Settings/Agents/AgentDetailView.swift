@@ -436,6 +436,7 @@ struct AgentDetailView: View {
         switch agentType {
         case .codex: return $draft.codexConfigTomlText
         case .grok: return $draft.grokConfigTomlText
+        case .cursor: return $draft.cursorCliConfigText
         case .hermes: return $draft.hermesConfigYaml
         default: return $draft.configText
         }
@@ -443,6 +444,7 @@ struct AgentDetailView: View {
     private var nativeConfigLabel: String {
         switch agentType {
         case .codex, .grok: return "config.toml"
+        case .cursor: return "cli-config.json"
         case .hermes: return "config.yaml"
         default: return "config.json"
         }
@@ -569,6 +571,11 @@ struct AgentDetailView: View {
             saveError = "Enter a valid http(s) URL for the self-hosted deployment."
             return
         }
+        // API-key mode with no key would persist a credential-less auth mode.
+        if AgentConfig.missingCursorApiKey(agentType, draft) {
+            saveError = "Enter your Cursor API key, or switch to Official Subscription."
+            return
+        }
         isSaving = true
         Task {
             do {
@@ -616,6 +623,7 @@ struct AgentConfigSection: View {
         case .hermes:     HermesConfigSection(draft: $draft)
         case .codeBuddy:  CodeBuddyConfigSection(draft: $draft)
         case .grok:       GrokConfigSection(draft: $draft)
+        case .cursor:     CursorConfigSection(draft: $draft, client: client)
         case .kimiCode:   KimiConfigSection(model: model, agent: agent, client: client)
         case .pi:         PiConfigSection(model: model, agent: agent, client: client)
         }

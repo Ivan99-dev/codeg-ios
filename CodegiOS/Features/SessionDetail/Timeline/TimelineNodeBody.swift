@@ -47,6 +47,8 @@ struct NodeBody: View {
         case .image(let img, let cap):
             InlineImageView(image: img, caption: cap)
                 .railHead(.top(14))
+        case .compaction(let before, let after, let running):
+            ContextCompactionDivider(before: before, after: after, running: running)
         case .footer(let turn, let questionID):
             TurnFooter(turn: turn, questionID: questionID)
         case .plan(let entries, let streaming):
@@ -248,6 +250,64 @@ struct ThinkingShimmer: View {
 }
 
 /// Inline error banner shown at the tail of a turn that errored or was cancelled.
+/// The context-compaction boundary: a hairline running the content width with a
+/// small archive glyph + label centered on it. Deliberately chrome-less (no card,
+/// no border) — it marks "the conversation's context was compacted here", it is
+/// not something the agent *did*.
+///
+/// Grok stamps the before/after token counts on its compaction; codex sends none,
+/// and a no-op delta (before == after) would read as a bug, so both fall back to
+/// the plain label.
+struct ContextCompactionDivider: View {
+    let before: Int?
+    let after: Int?
+    let running: Bool
+
+    private static let formatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        return f
+    }()
+
+    private func format(_ value: Int) -> String {
+        Self.formatter.string(from: NSNumber(value: value)) ?? String(value)
+    }
+
+    private var label: Text {
+        if running { return Text("Compacting context…") }
+        if let before, let after, before != after {
+            return Text("Context compacted · \(format(before)) → \(format(after)) tokens")
+        }
+        return Text("Context compacted")
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            hairline
+            HStack(spacing: 5) {
+                Image(systemName: "archivebox")
+                    .font(.system(size: 11, weight: .medium))
+                label
+                    .font(Theme.Typography.metaLabel)
+            }
+            .foregroundStyle(Theme.textTertiary)
+            .opacity(running ? 0.65 : 1)
+            .fixedSize()
+            hairline
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var hairline: some View {
+        Rectangle()
+            .fill(Theme.hairline)
+            .frame(height: 1)
+            .frame(maxWidth: .infinity)
+    }
+}
+
 struct InlineTurnError: View {
     let message: String
 

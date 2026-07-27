@@ -119,6 +119,32 @@ struct PendingQuestion: Identifiable {
     var id: String { questionId }
 }
 
+/// A Grok `exit_plan_mode` awaiting the user's decision. Distinct from
+/// ``PendingPermission``: Grok's plan approval is its own blocking ext request
+/// with three outcomes, not a permission option list. (Claude's ExitPlanMode
+/// still arrives as a permission and keeps that path.)
+struct PendingPlanApproval: Identifiable {
+    let approvalId: String
+    /// Grok's `toolCallId` for the `exit_plan_mode` call. Not used for the answer
+    /// (which keys on `approvalId`) — kept so the card can correlate with the
+    /// suppressed in-stream tool call.
+    let toolCallId: String
+    /// The plan, read from Grok's `plan.md`. May be empty — the card then shows an
+    /// empty-state notice rather than hiding, since the turn is blocked either way.
+    let planMarkdown: String
+    var id: String { approvalId }
+}
+
+/// The user's decision on a pending plan approval. snake_case on the wire.
+enum PlanApprovalDecision: String, Encodable, Sendable {
+    /// Grok leaves plan mode and starts implementing.
+    case approve
+    /// Grok revises the plan; plan mode stays active.
+    case requestChanges = "request_changes"
+    /// Plan mode is turned off.
+    case abandon
+}
+
 // MARK: - Permission tool-call parsing (port of web `parsePermissionToolCall`)
 
 struct PermissionPlanEntry: Hashable, Sendable {

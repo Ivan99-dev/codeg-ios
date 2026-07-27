@@ -15,6 +15,7 @@ enum AgentType: String, Codable, CaseIterable, Hashable, Sendable, Identifiable 
     case kimiCode = "kimi_code"
     case pi = "pi"
     case grok = "grok"
+    case cursor = "cursor"
 
     var id: String { rawValue }
 
@@ -38,6 +39,7 @@ enum AgentType: String, Codable, CaseIterable, Hashable, Sendable, Identifiable 
         case .kimiCode: return "Kimi Code"
         case .pi: return "Pi"
         case .grok: return "Grok"
+        case .cursor: return "Cursor"
         }
     }
 
@@ -55,6 +57,7 @@ enum AgentType: String, Codable, CaseIterable, Hashable, Sendable, Identifiable 
         case .kimiCode: return "Kimi"
         case .pi: return "Pi"
         case .grok: return "Grok"
+        case .cursor: return "Cursor"
         }
     }
 
@@ -72,6 +75,7 @@ enum AgentType: String, Codable, CaseIterable, Hashable, Sendable, Identifiable 
         case .kimiCode: return "moon.stars"
         case .pi: return "pi"
         case .grok: return "line.diagonal"
+        case .cursor: return "cursorarrow"
         }
     }
 
@@ -91,16 +95,17 @@ enum AgentType: String, Codable, CaseIterable, Hashable, Sendable, Identifiable 
         case .kimiCode: return "AgentKimiCode"
         case .pi: return "AgentPi"
         case .grok: return "AgentGrok"
+        case .cursor: return "AgentCursor"
         }
     }
 
     /// Whether the brand asset is a monochrome (template) glyph that should be
     /// tinted by the caller. Mirrors the web's `MONO_ICONS` set (OpenCode, Cline,
-    /// Hermes, CodeBuddy, Grok); the others carry their own brand colors/gradients
-    /// and render as-is.
+    /// Hermes, CodeBuddy, Grok, Cursor); the others carry their own brand
+    /// colors/gradients and render as-is.
     var iconIsTemplate: Bool {
         switch self {
-        case .openCode, .cline, .hermes, .codeBuddy, .grok: return true
+        case .openCode, .cline, .hermes, .codeBuddy, .grok, .cursor: return true
         case .claudeCode, .codex, .gemini, .openClaw, .kimiCode, .pi: return false
         }
     }
@@ -122,6 +127,9 @@ enum AgentType: String, Codable, CaseIterable, Hashable, Sendable, Identifiable 
         // would vanish on the dark card, so tint dynamically — near-black in
         // light, near-white in dark — mirroring the brand while staying legible.
         case .grok: return Color(light: Color(white: 0.12), dark: Color(white: 0.92))
+        // Cursor's cube mark is monochrome too (web renders it at plain
+        // `text-foreground`), so it gets the same appearance-following tint.
+        case .cursor: return Color(light: Color(white: 0.12), dark: Color(white: 0.92))
         }
     }
 }

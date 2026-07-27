@@ -189,6 +189,20 @@ extension CodegClient {
         try await postJSON("acp_fetch_kimi_models", FetchKimiModelsBody(baseUrl: baseUrl, apiKey: apiKey))
     }
 
+    /// Probe `cursor-agent status` for the Cursor panel's auth card. `apiKey` is
+    /// the key currently typed into the form (empty ⇒ test the browser login).
+    /// Never throws for an unauthenticated account — that's reported in the
+    /// result — only for transport failures.
+    func cursorAuthStatus(apiKey: String) async throws -> CursorAuthStatus {
+        try await postJSON("acp_cursor_auth_status", CursorProbeBody(apiKey: apiKey))
+    }
+
+    /// Probe `cursor-agent models` for the Cursor panel's model picker. A probe
+    /// that could not run comes back as an empty list plus `error`.
+    func cursorListModels(apiKey: String) async throws -> CursorModelsResult {
+        try await postJSON("acp_cursor_list_models", CursorProbeBody(apiKey: apiKey))
+    }
+
     /// pi's credentials/model save (native settings.json / auth.json). Returns nothing.
     func updatePiConfig(_ body: UpdatePiConfigBody) async throws {
         _ = try await send("acp_update_pi_config", body: body)

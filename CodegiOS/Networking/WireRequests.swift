@@ -105,6 +105,20 @@ struct AnswerQuestionBody: Encodable, Sendable {
     let answer: QuestionAnswer
 }
 
+/// Body for `acp_answer_plan_approval` — resolves Grok's blocked
+/// `exit_plan_mode`. `feedback` carries the revision notes for a
+/// `request_changes` decision (ignored by the other two).
+struct AnswerPlanApprovalBody: Encodable, Sendable {
+    let connectionId: String
+    let approvalId: String
+    let answer: PlanApprovalAnswer
+}
+
+struct PlanApprovalAnswer: Encodable, Sendable {
+    let decision: PlanApprovalDecision
+    var feedback: String?
+}
+
 /// Body for `acp_describe_agent_options`. Takes the agent type + an optional
 /// working dir — NOT a connection id (the server spawns a throwaway probe agent
 /// to enumerate options). camelCase keys, encoded as-is.

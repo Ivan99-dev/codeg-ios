@@ -144,6 +144,90 @@ enum CompanionJSON {
     }
 }
 
+/// Peels the host envelopes that wrap an MCP `CallToolResult` on its way to a
+/// tool card. Port of the web `mcp-result-envelope.ts`.
+///
+/// codex-acp forwards EVERY MCP tool call's outcome to the ACP wire as
+/// `rawOutput = { result: <CallToolResult> | null, error: <string> | null }`, and
+/// codex's own rollout tags the same result under a serde `{ Ok: … }` variant.
+/// Neither layer is part of the result the codeg-mcp companion returned, so a card
+/// that reads a companion result has to strip them first — otherwise the whole
+/// envelope falls through as opaque text and the card renders raw JSON (with the
+/// badge falling back to the tool lifecycle, reporting "done" for tasks that are
+/// still running).
+///
+/// The peel is deliberately narrow: a tool result is only ever a *child agent's*
+/// arbitrary payload away from being mangled, so both the destination and the
+/// failure case are positively identified rather than matched on key names alone.
+/// A payload that merely happens to own a `result` or `error` key is left exactly
+/// as it was.
+enum McpResultEnvelope {
+    /// Keys a host uses to nest the actual `CallToolResult`. `result` is
+    /// codex-acp's live-wire envelope; `Ok`/`ok` the serde-tagged `Result` variant
+    /// codex writes into its rollout.
+    private static let wrapperKeys = ["result", "Ok", "ok"]
+    /// One host layer plus a serde tag is the deepest shape seen.
+    private static let maxDepth = 3
+
+    struct Peeled {
+        /// The `CallToolResult` reached by peeling, or the input unchanged when no
+        /// host envelope was positively identified.
+        let obj: [String: Any]
+        /// codex-acp's `rawOutput.error`, read ONLY from an envelope carrying a
+        /// `result` key with nothing in it — i.e. the MCP call failed outright and
+        /// that string is all there is to show.
+        let hostError: String?
+    }
+
+    /// Strip host `{ result, error }` / `{ Ok }` layers from `obj`.
+    ///
+    /// - Parameter isResolvable: the caller's own "I can already read this shape"
+    ///   predicate. Peeling stops as soon as it holds, so a `CallToolResult` that
+    ///   itself owns a `result` key is never unwrapped out from under the caller.
+    static func peel(_ obj: [String: Any], isResolvable: ([String: Any]) -> Bool) -> Peeled {
+        var current = obj
+        var depth = 0
+        while depth < maxDepth, !isResolvable(current) {
+            var next: [String: Any]?
+            for key in wrapperKeys {
+                if let value = current[key] as? [String: Any], isCallToolResult(value) {
+                    next = value
+                    break
+                }
+            }
+            // Nothing peelable left: this is either the payload itself or a host
+            // envelope whose call failed before producing a result.
+            guard let next else { return Peeled(obj: current, hostError: hostFailureError(current)) }
+            current = next
+            depth += 1
+        }
+        return Peeled(obj: current, hostError: nil)
+    }
+
+    /// Whether `value` is an MCP `CallToolResult` — the only thing worth peeling
+    /// TO. Requiring this of the destination (not just the wrapper key's presence)
+    /// is what keeps a child's own `{result: {...}}` payload from being unwrapped
+    /// and then misread as a report.
+    private static func isCallToolResult(_ value: [String: Any]) -> Bool {
+        if value["content"] is [Any] { return true }
+        return value["structuredContent"] is [String: Any]
+    }
+
+    /// The error string of a host FAILURE envelope — `{result: null, error: "…"}`.
+    /// codex-acp always emits both keys, so requiring a present-but-empty `result`
+    /// alongside the string is what separates a failed MCP call from a child
+    /// payload that merely has an `error` field of its own.
+    private static func hostFailureError(_ obj: [String: Any]) -> String? {
+        guard obj.keys.contains("result") else { return nil }
+        // `JSONSerialization` models a JSON null as `NSNull`; a missing value is
+        // absent from the dictionary. Both count as "no result".
+        if let value = obj["result"], !(value is NSNull) { return nil }
+        guard let err = obj["error"] as? String,
+              !err.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        return err
+    }
+}
+
 /// Minimal NSRegularExpression capture helper for the line/text parsing the
 /// companion parsers do (the broker's human-readable result shapes).
 enum Rx {

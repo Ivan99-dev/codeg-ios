@@ -112,8 +112,8 @@ struct TimelineRailRow<Body: View>: View {
     /// continuous through them. Every glyph marker breaks the spine around itself.
     private var spineRunsThrough: Bool {
         switch marker {
-        case .system, .footer: return true
-        default:               return false
+        case .system, .footer, .compaction: return true
+        default:                            return false
         }
     }
 
@@ -224,6 +224,9 @@ enum MarkerKind {
     case thinking
     case error
     case footer
+    /// A context-compaction boundary. Like `.footer` it is a *marker on* the
+    /// spine, not an event hanging off it, so the rail runs straight through.
+    case compaction
 }
 
 /// The gutter marker. Centralizes state tinting, the running pulse, the
@@ -282,6 +285,12 @@ struct NodeMarker: View {
             // A small solid tick sitting *on* the spine (which runs through it, not
             // around), so the rail reads as continuous through a turn boundary
             // rather than broken.
+            Circle()
+                .fill(Theme.rail)
+                .frame(width: size * 0.42, height: size * 0.42)
+        case .compaction:
+            // The divider body already carries the archive glyph and the label;
+            // the gutter just marks the point on the spine.
             Circle()
                 .fill(Theme.rail)
                 .frame(width: size * 0.42, height: size * 0.42)

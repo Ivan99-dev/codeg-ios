@@ -84,6 +84,11 @@ final class SessionDetailViewModel {
     private(set) var pendingPermission: PendingPermission?
     /// A pending `ask_user_question` awaiting the user's answers.
     private(set) var pendingQuestion: PendingQuestion?
+    /// A pending Grok `exit_plan_mode` awaiting approve / request-changes / abandon.
+    private(set) var pendingPlanApproval: PendingPlanApproval?
+    /// Revision notes waiting to be sent as a follow-up prompt after a
+    /// "request changes" decision (see ``answerPlanApproval(decision:feedback:)``).
+    private var pendingPlanFollowUp: String?
 
     private(set) var summary: ConversationSummary?
     private(set) var sessionStats: SessionStats?
@@ -610,9 +615,14 @@ final class SessionDetailViewModel {
 
     // MARK: - Send
 
-    func send() {
-        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        let sending = attachments
+    /// Send the composer's draft — or, with `overrideText`, a prompt the app itself
+    /// generated (today: the revision notes from a plan-approval "request changes",
+    /// which Grok expects as a follow-up turn). An override never touches the
+    /// composer's draft or attachments, so a message the user was typing survives;
+    /// a rejected send still restores the text into the composer so it isn't lost.
+    func send(overrideText: String? = nil) {
+        let text = (overrideText ?? draft).trimmingCharacters(in: .whitespacesAndNewlines)
+        let sending = overrideText == nil ? attachments : []
         guard (!text.isEmpty || !sending.isEmpty), !isInFlight else { return }
         // Identity comes from the loaded summary (existing conversation) or the
         // new-task request; without either the screen isn't ready to send.
@@ -646,8 +656,10 @@ final class SessionDetailViewModel {
             timestamp: Date()
         )
         pendingUserTurns.append(userTurn)
-        draft = ""
-        attachments = []
+        if overrideText == nil {
+            draft = ""
+            attachments = []
+        }
 
         // 2) Live assistant placeholder.
         let live = LiveTurn()
@@ -1153,6 +1165,7 @@ final class SessionDetailViewModel {
     private func buildLiveTurn(from snap: LiveSessionSnapshot) -> LiveTurn? {
         let blocks = snap.liveMessage?.content ?? []
         let hasPending = snap.pendingPermission != nil || snap.pendingQuestion != nil
+            || snap.pendingPlanApproval != nil
         guard !blocks.isEmpty || hasPending || snap.status == .prompting else { return nil }
 
         let live = LiveTurn()
@@ -1190,6 +1203,18 @@ final class SessionDetailViewModel {
         }
         if let q = snap.pendingQuestion {
             pendingQuestion = PendingQuestion(questionId: q.questionId, questions: q.questions)
+        }
+        // Set OR clear: the attach snapshot is the connection's authoritative
+        // pending state, so an approval that another client resolved while we were
+        // reconnecting must not leave a stale, still-actionable card behind
+        // (answering it would post a decision for an approval that no longer
+        // exists). The permission/question restores above deliberately keep their
+        // existing set-only behavior — changing those is out of scope here.
+        if let p = snap.pendingPlanApproval {
+            pendingPlanApproval = PendingPlanApproval(
+                approvalId: p.approvalId, toolCallId: p.toolCallId, planMarkdown: p.planMarkdown)
+        } else {
+            pendingPlanApproval = nil
         }
     }
 
@@ -1277,6 +1302,15 @@ final class SessionDetailViewModel {
         case .questionResolved(let questionId):
             if pendingQuestion?.questionId == questionId { pendingQuestion = nil }
 
+        case .planApprovalRequest(let approvalId, let toolCallId, let planMarkdown):
+            // Grok finished planning and is blocked until the user decides.
+            pendingPlanApproval = PendingPlanApproval(
+                approvalId: approvalId, toolCallId: toolCallId, planMarkdown: planMarkdown)
+            requestScrollToBottom()
+
+        case .planApprovalResolved(let approvalId):
+            if pendingPlanApproval?.approvalId == approvalId { pendingPlanApproval = nil }
+
         case .planUpdate(let entries):
             live.updatePlan(entries)
             requestScrollToBottom()
@@ -1320,6 +1354,9 @@ final class SessionDetailViewModel {
     private func finalize(live: LiveTurn, stopReason: String) {
         guard isTurnActive else { return }
         isTurnActive = false
+        // Read before clearing: this is the one transition that delivers parked
+        // plan-revision notes (every other terminal path drops them).
+        let planFollowUp = pendingPlanFollowUp
         clearInteractivePrompts()
         // Publish any pending coalesced text before flipping to the finalized
         // render so the seam is reflow-free (the finalized branch reads the same
@@ -1333,6 +1370,9 @@ final class SessionDetailViewModel {
         requestScrollToBottom()
         // Replace the optimistic + live turns with the authoritative server copy.
         Task { [weak self] in await self?.refreshAfterTurn(reconciling: live) }
+        // The keep-planning turn just ended — deliver the revision notes as the
+        // follow-up prompt Grok expects (it discards them on the reply itself).
+        if let planFollowUp { send(overrideText: planFollowUp) }
     }
 
     /// Roll back an optimistic send that failed *before the server accepted the
@@ -1506,11 +1546,48 @@ final class SessionDetailViewModel {
         await answerQuestion(.dismissed)
     }
 
-    /// A blocked permission/question can't outlive its turn: clear any pending
-    /// card when the turn finalizes, fails, or is cancelled.
+    /// Resolve Grok's blocked `exit_plan_mode`. Optimistic clear on success.
+    ///
+    /// "Request changes" needs one extra step: Grok DISCARDS the reply's `feedback`
+    /// on the keep-planning path (only approve/abandon consume it), and its own TUI
+    /// instead delivers the revision notes as a follow-up user turn. Mirror that —
+    /// otherwise the notes vanish and Grok re-presents the same plan. The
+    /// keep-planning turn is usually still winding down at this point, so the
+    /// follow-up is parked and flushed when the turn completes.
+    func answerPlanApproval(decision: PlanApprovalDecision, feedback: String?) async -> Bool {
+        guard let pending = pendingPlanApproval, let conn = connectionID else { return false }
+        let notes = (feedback ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            try await client.answerPlanApproval(connectionId: conn, approvalId: pending.approvalId,
+                                                decision: decision, feedback: notes.isEmpty ? nil : notes)
+            if pendingPlanApproval?.approvalId == pending.approvalId { pendingPlanApproval = nil }
+            if decision == .requestChanges, !notes.isEmpty {
+                // Park the notes for THIS turn's completion — `finalize` picks them
+                // up. If the keep-planning turn already ended, send them now.
+                if isInFlight { pendingPlanFollowUp = notes } else { send(overrideText: notes) }
+            }
+            requestScrollToBottom()
+            return true
+        } catch {
+            notice = Self.describe(error)
+            return false
+        }
+    }
+
+    /// A blocked permission/question/plan-approval can't outlive its turn: clear
+    /// any pending card when the turn finalizes, fails, or is cancelled.
+    ///
+    /// Parked plan-revision notes are dropped here too — they are meaningful only
+    /// as the immediate follow-up to the keep-planning turn that produced them. A
+    /// turn that failed or was cancelled never gets that follow-up, and leaving
+    /// the notes parked would let a LATER, unrelated turn's completion send them.
+    /// (`finalize` — the one path that legitimately delivers them — reads them
+    /// before calling this.)
     private func clearInteractivePrompts() {
         pendingPermission = nil
         pendingQuestion = nil
+        pendingPlanApproval = nil
+        pendingPlanFollowUp = nil
     }
 
     /// After a successful turn, re-fetch the persisted transcript and splice it

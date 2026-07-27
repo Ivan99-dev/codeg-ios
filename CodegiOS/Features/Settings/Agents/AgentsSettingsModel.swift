@@ -112,7 +112,26 @@ final class AgentsSettingsModel {
                     agentType: agentType, enabled: liveEnabled,
                     env: envMap, modelProviderId: payload.modelProviderId)
                 let body = self.makeConfigBody(agentType, draft: payload, original: original)
-                let affectedConfig = try await client.updateAgentConfig(body)
+                let affectedConfig: Int
+                do {
+                    affectedConfig = try await client.updateAgentConfig(body)
+                } catch {
+                    // The two writes are not one transaction. For an agent whose env
+                    // and native config are two halves of ONE permission decision, a
+                    // half-applied save is worse than a failed one: Cursor's "Run
+                    // Everything" rides the env while its deny rules live in
+                    // cli-config.json, so a rejected config write (e.g. hand-edited
+                    // invalid JSON under Advanced) would otherwise leave commands
+                    // auto-approved with the new rules never applied. Put the env back
+                    // exactly as it was, then report the original failure. Mirrors the
+                    // web Cursor panel's explicit rollback.
+                    if agentType == .cursor, let previousEnv = original.env {
+                        _ = try? await client.updateAgentEnv(
+                            agentType: agentType, enabled: liveEnabled,
+                            env: previousEnv, modelProviderId: original.modelProviderId)
+                    }
+                    throw error
+                }
                 self.surfaceAffected(max(affectedEnv, affectedConfig))
                 await self.loadBody()
                 return nil
@@ -154,6 +173,22 @@ final class AgentsSettingsModel {
                 defaultReasoningEffort: draft.grokReasoningEffort.isEmpty ? nil : draft.grokReasoningEffort)
             if draft.grokConfigTomlText != (original.grokConfigToml ?? "") {
                 body.grokConfigToml = draft.grokConfigTomlText
+            }
+        case .cursor:
+            // Same split as Grok: Cursor has no config.json, the structured patch
+            // always goes, and the raw cli-config.json only when the user edited it
+            // — otherwise the backend merges the rules onto the FRESH on-disk file
+            // instead of a snapshot the Cursor CLI's own `/config` UI may have
+            // moved on from. `""` sandbox means "leave sandbox.mode alone"; the rule
+            // lists are replaced wholesale, so an emptied list is sent as `[]`.
+            body.cursorStructured = CursorStructuredConfig(
+                sandboxMode: draft.cursorSandboxMode.isEmpty ? nil : draft.cursorSandboxMode,
+                permissionsAllow: draft.cursorAllowRules.map { $0.trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty },
+                permissionsDeny: draft.cursorDenyRules.map { $0.trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty })
+            if draft.cursorCliConfigText != (original.cursorCliConfigJson ?? "") {
+                body.cursorCliConfigJson = draft.cursorCliConfigText
             }
         default:
             var configForPersist = JSONConfig.normalize(draft.configText)

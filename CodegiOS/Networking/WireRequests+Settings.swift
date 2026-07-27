@@ -157,11 +157,27 @@ struct GrokStructuredConfig: Encodable, Sendable {
     }
 }
 
+/// Cursor's structured controls sent inside `acp_update_agent_config`, merged
+/// onto the current on-disk `~/.cursor/cli-config.json` so keys written by the
+/// CLI's own `/config` UI survive.
+///
+/// Unlike ``GrokStructuredConfig``, an absent field here means "leave that key
+/// alone" (the backend's `Option` is a patch, not a set-or-delete), so this omits
+/// nil fields instead of sending explicit nulls. The rule lists are replaced
+/// wholesale, so an emptied list is sent as `[]` — that's a real "no rules", not
+/// an omission.
+struct CursorStructuredConfig: Encodable, Sendable {
+    var sandboxMode: String?
+    var permissionsAllow: [String]?
+    var permissionsDeny: [String]?
+}
+
 /// `acp_update_agent_config` — writes the native config files. Every payload key
 /// is always sent (explicit `null` when not applicable for the agent type),
 /// matching the web which never omits them. `grokConfigToml`/`grokStructured`
-/// are the Grok surfaces: the raw text (only when the user edited it) and the
-/// structured controls the backend merges onto the config.toml.
+/// and `cursorCliConfigJson`/`cursorStructured` are the two merge-style
+/// surfaces: the raw file text (only when the user edited it) plus the
+/// structured controls the backend merges onto it.
 struct UpdateAgentConfigBody: Encodable, Sendable {
     let agentType: AgentType
     var configJson: String?
@@ -170,10 +186,12 @@ struct UpdateAgentConfigBody: Encodable, Sendable {
     var codexConfigToml: String?
     var grokConfigToml: String?
     var grokStructured: GrokStructuredConfig?
+    var cursorCliConfigJson: String?
+    var cursorStructured: CursorStructuredConfig?
 
     enum CodingKeys: String, CodingKey {
         case agentType, configJson, opencodeAuthJson, codexAuthJson, codexConfigToml
-        case grokConfigToml, grokStructured
+        case grokConfigToml, grokStructured, cursorCliConfigJson, cursorStructured
     }
 
     func encode(to encoder: Encoder) throws {
@@ -186,7 +204,17 @@ struct UpdateAgentConfigBody: Encodable, Sendable {
         try c.encodeNilable(grokConfigToml, forKey: .grokConfigToml)
         if let grokStructured { try c.encode(grokStructured, forKey: .grokStructured) }
         else { try c.encodeNil(forKey: .grokStructured) }
+        try c.encodeNilable(cursorCliConfigJson, forKey: .cursorCliConfigJson)
+        if let cursorStructured { try c.encode(cursorStructured, forKey: .cursorStructured) }
+        else { try c.encodeNil(forKey: .cursorStructured) }
     }
+}
+
+/// `acp_cursor_auth_status` / `acp_cursor_list_models` — the probe key is the one
+/// typed into the panel (so the probes test what's on screen, not what's saved);
+/// empty/nil means "use the browser-login credential".
+struct CursorProbeBody: Encodable, Sendable {
+    var apiKey: String?
 }
 
 /// `acp_update_hermes_config` — hermes' separate save path. `apiKey`/`baseUrl`

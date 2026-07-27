@@ -247,6 +247,18 @@ struct CodegClient: Sendable {
         ))
     }
 
+    /// Resolve Grok's blocked `exit_plan_mode`. The backend broadcasts
+    /// `plan_approval_resolved` so every client viewing the conversation clears
+    /// its card, then unblocks the parked ext request.
+    func answerPlanApproval(connectionId: String, approvalId: String,
+                            decision: PlanApprovalDecision, feedback: String?) async throws {
+        _ = try await send("acp_answer_plan_approval", body: AnswerPlanApprovalBody(
+            connectionId: connectionId,
+            approvalId: approvalId,
+            answer: PlanApprovalAnswer(decision: decision, feedback: feedback)
+        ))
+    }
+
     /// Find a live connection already bound to a conversation, if any. The
     /// server requires `agentType` and uses `sessionId` (the conversation's
     /// `external_id`) to match a connection before the first prompt binds one.

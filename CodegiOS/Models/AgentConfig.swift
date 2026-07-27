@@ -111,6 +111,13 @@ enum AgentEnvKeys {
             return (["GROK_XAI_API_BASE_URL", "XAI_API_BASE_URL", "API_BASE_URL"],
                     ["XAI_API_KEY"],
                     ["GROK_DEFAULT_MODEL", "MODEL"])
+        case .cursor:
+            // cursor-agent authenticates against Cursor's own backend only: no
+            // bring-your-own endpoint (so no base-url keys at all), and the
+            // generic API_KEY alias is excluded so auth status can't false-positive.
+            return ([],
+                    ["CURSOR_API_KEY"],
+                    ["CURSOR_MODEL"])
         default:
             return (["OPENAI_BASE_URL", "API_BASE_URL"],
                     ["OPENAI_API_KEY", "API_KEY"],
@@ -334,6 +341,19 @@ struct AgentDraft: Equatable, Sendable {
     var grokReasoningEffort = ""
     var grokConfigTomlText = ""
 
+    // Cursor. `apiKey` is reused for CURSOR_API_KEY. The auth method, model and
+    // Run Everything knob ride the env; the sandbox mode + permission rules are a
+    // structured patch on cli-config.json, and the raw file is the escape hatch —
+    // both persisted via `acp_update_agent_config` (cursor_structured /
+    // cursor_cli_config_json).
+    var cursorAuthMode: CursorConfig.AuthMethod = .subscription
+    var cursorModel = ""
+    var cursorForce = true
+    var cursorSandboxMode = ""
+    var cursorAllowRules: [String] = []
+    var cursorDenyRules: [String] = []
+    var cursorCliConfigText = ""
+
     // Cline
     var clineProvider = "anthropic"
     var clineApiKey = ""
@@ -466,6 +486,22 @@ extension AgentDraft {
             self.grokPermissionMode = agent.grokSettings?.permissionMode ?? ""
             self.grokReasoningEffort = agent.grokSettings?.defaultReasoningEffort ?? ""
             self.grokConfigTomlText = agent.grokConfigToml ?? ""
+        }
+
+        // Cursor: `apiKey` (CURSOR_API_KEY) comes from the shared `important`
+        // branch; the rest is read straight off the env plus the backend's parsed
+        // cli-config.json projection.
+        if agent.agentType == .cursor {
+            let env = agent.env ?? [:]
+            self.cursorAuthMode = CursorConfig.inferMode(env)
+            self.cursorModel = (env[CursorConfig.modelEnv] ?? "").trimmingCharacters(in: .whitespaces)
+            // A fresh Cursor agent defaults to Run Everything; only an explicitly
+            // written knob (incl. "0" = "ask before running") overrides that.
+            self.cursorForce = CursorConfig.hasForceKnob(env) ? CursorConfig.isForceEnabled(env) : true
+            self.cursorSandboxMode = agent.cursorSettings?.sandboxMode ?? ""
+            self.cursorAllowRules = agent.cursorSettings?.permissionsAllow ?? []
+            self.cursorDenyRules = agent.cursorSettings?.permissionsDeny ?? []
+            self.cursorCliConfigText = agent.cursorCliConfigJson ?? ""
         }
 
         // Hermes: the projection carries provider/model/baseUrl/apiKey.
@@ -692,6 +728,14 @@ enum AgentConfig {
             // Only XAI_API_KEY rides the env; the structured controls + raw toml
             // are persisted via acp_update_agent_config, not baked into envText.
             out.envText = applyGrokEnv(draft.envText, draft)
+        case .cursor:
+            // Auth method / credential / model / Run Everything ride the env; the
+            // sandbox + permission rules are persisted via acp_update_agent_config.
+            out.envText = CursorConfig.applyEnv(draft.envText,
+                                                mode: draft.cursorAuthMode,
+                                                apiKey: draft.apiKey,
+                                                model: draft.cursorModel,
+                                                force: draft.cursorForce)
         case .cline:
             out.configText = buildClineConfig(draft)
         case .codex:
@@ -868,6 +912,15 @@ enum AgentConfig {
         agent == .codeBuddy
             && draft.codeBuddyEnvironment == .selfHosted
             && !isValidCodeBuddyBaseUrl(draft.codeBuddyBaseUrl)
+    }
+
+    /// Cursor in API-key mode with nothing typed: saving would write an auth mode
+    /// that has no credential to go with it, so the launch would silently fall back
+    /// to the browser login. Mirrors the web's `cursor.customApiKeyRequired` guard.
+    static func missingCursorApiKey(_ agent: AgentType, _ draft: AgentDraft) -> Bool {
+        agent == .cursor
+            && draft.cursorAuthMode == .custom
+            && draft.apiKey.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     private static func buildClineConfig(_ d: AgentDraft) -> String {

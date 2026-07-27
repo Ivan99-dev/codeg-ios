@@ -48,8 +48,15 @@ struct ToolCallVM: Identifiable {
     init(id: String, rawName: String, kind: String, state: ToolCallState,
          input: String?, output: String?, content: String?, isError: Bool,
          meta: AnyJSON? = nil) {
+        // Grok's plan-mode tools carry their authoritative identity in
+        // `_meta["x.ai/tool"].kind`, while the `title` we're handed as `rawName`
+        // MUTATES across the lifecycle (`enter_plan_mode` → "Plan: Enter" → "Plan
+        // mode entered"). Resolve them to the canonical name up front so the live
+        // stream lands on the same identity the persisted path reads from
+        // `x.ai/tool.name` — and so the card's title stops changing mid-stream.
+        let resolvedName = ToolDerive.grokPlanModeName(meta) ?? rawName
         self.id = id
-        self.rawName = rawName
+        self.rawName = resolvedName
         self.kind = kind
         self.state = state
         self.input = input
@@ -59,12 +66,12 @@ struct ToolCallVM: Identifiable {
         self.meta = meta
 
         let parsed = ToolDerive.parseJSON(input)
-        let b = ToolDerive.bucket(name: rawName, kind: kind)
-        let comp = CompanionDetect.kind(name: rawName, input: input, parsed: parsed)
+        let b = ToolDerive.bucket(name: resolvedName, kind: kind)
+        let comp = CompanionDetect.kind(name: resolvedName, input: input, parsed: parsed)
         self.bucket = b
         self.companion = comp
-        self.displayTitle = ToolDerive.title(name: rawName, bucket: b, input: input, parsed: parsed)
-        self.icon = comp.map(ToolDerive.companionIcon) ?? ToolDerive.icon(bucket: b, name: rawName)
+        self.displayTitle = ToolDerive.title(name: resolvedName, bucket: b, input: input, parsed: parsed)
+        self.icon = comp.map(ToolDerive.companionIcon) ?? ToolDerive.icon(bucket: b, name: resolvedName)
         self.diffFiles = ToolDerive.diff(bucket: b, input: input, output: output, content: content, parsed: parsed)
     }
 
@@ -72,6 +79,10 @@ struct ToolCallVM: Identifiable {
     var hasOutput: Bool { !trimmedOutput.isEmpty }
     /// Bash/shell output renders in a terminal-ish code block.
     var isCommand: Bool { bucket == .execute }
+    /// A plan-*mode* transition (Claude's `EnterPlanMode`/`ExitPlanMode`, Grok's
+    /// `enter_plan_mode`/`exit_plan_mode`, Cline's `switch_mode`). A mode signal,
+    /// not a work tool, so it renders standalone instead of folding into a group.
+    var isPlanMode: Bool { ToolDerive.isPlanModeName(rawName) }
 }
 
 /// One ordered piece of a rendered assistant turn. The persisted and live
@@ -90,6 +101,10 @@ enum RenderPart {
     /// `TaskList`/`TaskGet`), merged into one evolving checklist card.
     case taskGroup([ToolCallVM])
     case image(ImageData, caption: String?)
+    /// A context compaction (`_meta.contextCompaction`) — a conversation boundary
+    /// marker, not a tool call. Rendered as a chrome-less centered divider; the
+    /// token counts are Grok-only (codex sends none).
+    case compaction(before: Int?, after: Int?, running: Bool)
     case unknown(type: String)
 }
 
@@ -127,6 +142,15 @@ enum MessageRender {
                     output = outPreview; isErr = e; consumed.insert(r)
                 }
                 let state: ToolCallState = resultIdx == nil ? .running : (isErr ? .error : .done)
+                // A compaction is a boundary marker, not a call: it renders as a
+                // divider between turns, so it never becomes a `ToolCallVM` (and so
+                // can't be swept into a tool group).
+                if ContextCompaction.matches(meta) {
+                    let counts = ContextCompaction.tokens(meta)
+                    parts.append(.compaction(before: counts.before, after: counts.after,
+                                             running: state == .running))
+                    continue
+                }
                 parts.append(.tool(ToolCallVM(
                     id: toolID ?? "tool-\(idx)", rawName: name, kind: "", state: state,
                     input: inputPreview, output: output, content: nil, isError: isErr, meta: meta)))
@@ -163,6 +187,15 @@ enum MessageRender {
                 parts.append(.liveReasoning(run, streaming: turn.isStreaming && isLast))
             case .tool(let call):
                 let state: ToolCallState = call.isFinished ? (call.isError ? .error : .done) : .running
+                // Same boundary-marker treatment as the persisted path: codex emits
+                // the `Context compacting` → `Context compacted` pair on one id, so
+                // the divider flips from running to settled in place.
+                if ContextCompaction.matches(call.meta) {
+                    let counts = ContextCompaction.tokens(call.meta)
+                    parts.append(.compaction(before: counts.before, after: counts.after,
+                                             running: state == .running))
+                    continue
+                }
                 parts.append(.tool(ToolCallVM(
                     id: call.id, rawName: call.title, kind: call.kind, state: state,
                     input: call.rawInput, output: call.rawOutput, content: call.content, isError: call.isError,
@@ -198,10 +231,11 @@ enum MessageRender {
         }
 
         for part in parts {
-            // Agent-dispatch (`.task`), task-management (`.taskMgmt`), and the
-            // codeg-mcp companion tools each have their own dedicated card, so they
-            // never fold into a generic tool run.
-            if case .tool(let vm) = part, vm.bucket != .task, vm.bucket != .taskMgmt, vm.companion == nil {
+            // Agent-dispatch (`.task`), task-management (`.taskMgmt`), plan-mode
+            // transitions, and the codeg-mcp companion tools each render on their
+            // own, so they never fold into a generic tool run.
+            if case .tool(let vm) = part, vm.bucket != .task, vm.bucket != .taskMgmt,
+               !vm.isPlanMode, vm.companion == nil {
                 run.append(vm)
             } else {
                 flush()
@@ -385,6 +419,15 @@ enum ToolDerive {
             return nil
         }
 
+        // Plan-mode transitions get a fixed human title. Grok's own titles mutate
+        // as the call progresses, so deriving from the name keeps the card stable.
+        if isPlanModeName(name) {
+            let normalized = n.replacingOccurrences(of: "_", with: "")
+            if normalized == "enterplanmode" { return "Entered plan mode" }
+            if normalized == "exitplanmode" { return "Plan ready" }
+            return "Switched mode"
+        }
+
         // Execute/shell tools show the actual command. Keyed off the `bucket`
         // rather than the name: the live path identifies shells by the ACP
         // `kind` and passes an arbitrary agent-supplied title as the "name", and
@@ -509,7 +552,33 @@ enum ToolDerive {
         return .other
     }
 
+    /// Grok stamps the authoritative tool identity in `_meta["x.ai/tool"]`
+    /// (`{name, kind, namespace, label}`). For its plan-mode tools this returns the
+    /// canonical `enter_plan_mode` / `exit_plan_mode`; nil for every other Grok tool
+    /// and every non-Grok host, so their existing name resolution is preserved.
+    /// Keyed on the stable `kind` discriminator, which — unlike `title` — does not
+    /// mutate across the tool_call lifecycle.
+    static func grokPlanModeName(_ meta: AnyJSON?) -> String? {
+        switch meta?["x.ai/tool"]?["kind"]?.string {
+        case "enter_plan": return "enter_plan_mode"
+        case "exit_plan": return "exit_plan_mode"
+        default: return nil
+        }
+    }
+
+    /// Plan-*mode* transition tools. Mirrors the web `isPlanModeToolName`:
+    /// deliberately NOT the looser "contains plan" test, so Codex's `update_plan`
+    /// (a real checklist) keeps its own rendering.
+    static func isPlanModeName(_ name: String) -> Bool {
+        switch canonical(name).replacingOccurrences(of: "_", with: "") {
+        case "enterplanmode", "exitplanmode", "switchmode": return true
+        default: return false
+        }
+    }
+
     static func icon(bucket: ToolKindBucket, name: String) -> String {
+        // A mode signal, not a work tool — same checklist glyph the plan node uses.
+        if isPlanModeName(name) { return "checklist" }
         switch bucket {
         case .read: return "doc.text"
         case .edit: return "square.and.pencil"
