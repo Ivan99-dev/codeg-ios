@@ -1,5 +1,6 @@
 import Combine
 import SwiftUI
+import Combine
 
 /// The Folders tab: every folder/workspace on the server as a first-class
 /// destination — color, path, branch, default agent, and a live running count.
@@ -24,7 +25,7 @@ struct ProjectListView: View {
         .screenTitle("Folders", compact: horizontalSizeClass == .compact)
         .toolbar {
             if client != nil {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button {
                             browseOpen = true

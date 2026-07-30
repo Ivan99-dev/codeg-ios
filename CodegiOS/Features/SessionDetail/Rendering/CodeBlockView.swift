@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import UIKit
 
 /// A "copy to clipboard" affordance: a doc icon that briefly flips to a
@@ -13,10 +14,10 @@ struct CopyButton: View {
     var body: some View {
         Button {
             UIPasteboard.general.string = text
-            withAnimation(.snappy(duration: 0.18)) { copied = true }
+            withAnimation(.easeInOut(duration: 0.18)) { copied = true }
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(1.6))
-                withAnimation(.snappy(duration: 0.18)) { copied = false }
+                withAnimation(.easeInOut(duration: 0.18)) { copied = false }
             }
         } label: {
             HStack(spacing: 4) {
@@ -31,7 +32,6 @@ struct CopyButton: View {
         }
         .buttonStyle(.plain)
         // A soft success tick on copy (only on the copy, not the 1.6s auto-reset).
-        .sensoryFeedback(trigger: copied) { _, now in now ? .success : nil }
     }
 }
 
@@ -99,7 +99,7 @@ struct CodeBlockView: View {
 
     private var expandToggle: some View {
         Button {
-            withAnimation(.snappy(duration: 0.2)) { expanded.toggle() }
+            withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
         } label: {
             (expanded ? Text("Show less") : Text("Show \(lines.count - collapsedLineLimit) more lines"))
                 .font(.system(size: 10, weight: .semibold))

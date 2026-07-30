@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Self-contained Pi settings panel (ported from the web `PiConfigPanel`). Pi has
 /// three independent stores — runtime (which pi binary pi-acp spawns), credentials
@@ -159,7 +160,7 @@ struct PiConfigSection: View {
             Button { Task { await detectPiBinary() } } label: {
                 Image(systemName: "arrow.clockwise").font(.body.weight(.medium))
             }
-            .buttonStyle(.glass).tint(Theme.textSecondary)
+            .buttonStyle(.bordered).tint(Theme.textSecondary)
             .disabled(checkingPi || piOp != nil)
             .accessibilityLabel("Recheck")
             if !checkingPi {
@@ -184,7 +185,7 @@ struct PiConfigSection: View {
                     if validating { ProgressView().controlSize(.small) }
                     else { Label("Validate", systemImage: "terminal").labelStyle(.titleAndIcon) }
                 }
-                .font(.subheadline.weight(.medium)).buttonStyle(.glass).tint(Theme.accent)
+                .font(.subheadline.weight(.medium)).buttonStyle(.bordered).tint(Theme.accent)
                 .disabled(validating || command.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         }
@@ -313,15 +314,15 @@ struct PiConfigSection: View {
             .padding(.horizontal, 14).padding(.vertical, 5)
         }
         if prominent {
-            label.buttonStyle(.glassProminent).tint(Theme.accent).disabled(disabled)
+            label.buttonStyle(.borderedProminent).tint(Theme.accent).disabled(disabled)
         } else {
-            label.buttonStyle(.glass).tint(Theme.accent).disabled(disabled)
+            label.buttonStyle(.bordered).tint(Theme.accent).disabled(disabled)
         }
     }
 
     @ViewBuilder
     private func disclosure<C: View>(_ title: LocalizedStringKey, isOpen: Binding<Bool>, @ViewBuilder content: () -> C) -> some View {
-        Button { withAnimation(.snappy(duration: 0.2)) { isOpen.wrappedValue.toggle() } } label: {
+        Button { withAnimation(.easeInOut(duration: 0.2)) { isOpen.wrappedValue.toggle() } } label: {
             HStack(spacing: 8) {
                 Text(title).font(.subheadline).foregroundStyle(Theme.textPrimary)
                 Spacer(minLength: 8)

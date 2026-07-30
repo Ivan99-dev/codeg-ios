@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Folder-detail server calls — browsing a folder's files and reading its git
 /// history. Kept in an extension so `CodegClient.swift` stays focused on the

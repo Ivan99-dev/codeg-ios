@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Per-agent settings detail. Hosts the shared sections (header, enabled, preflight
 /// + fixes, install/version, native-config escape hatch) and dispatches to a
@@ -28,6 +29,7 @@ struct AgentDetailView: View {
     @State private var pendingUninstall: AgentInstallAction?
     // Advanced (raw native config) — collapsed by default; it's an escape hatch.
     @State private var showNativeConfig = false
+    @State private var wasInstalling = false
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -89,8 +91,9 @@ struct AgentDetailView: View {
             providers = (try? await client?.listModelProviders()) ?? []
         }
         // Re-run preflight when an install finishes so checks + version reconcile.
-        .onChange(of: isInstalling) { wasInstalling, nowInstalling in
+        .onChange(of: isInstalling) { nowInstalling in
             if wasInstalling && !nowInstalling { Task { await loadPreflight(force: true) } }
+            wasInstalling = nowInstalling
         }
         .alert("Couldn’t Save", isPresented: Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })) {
             Button("OK", role: .cancel) { saveError = nil }
@@ -308,7 +311,7 @@ struct AgentDetailView: View {
                     Text(primary.label).fontWeight(.semibold)
                         .padding(.horizontal, 18).padding(.vertical, 5)
                 }
-                .buttonStyle(.glassProminent).tint(Theme.accent)
+                .buttonStyle(.borderedProminent).tint(Theme.accent)
                 .disabled(isInstalling || primary.disabled)
                 Spacer(minLength: 0)
                 if !secondary.isEmpty { versionMenu(secondary, iconOnly: true) }
@@ -334,7 +337,7 @@ struct AgentDetailView: View {
                     .font(.subheadline.weight(.medium)).padding(.horizontal, 16).padding(.vertical, 7)
             }
         }
-        .buttonStyle(.glass).tint(iconOnly ? Theme.textSecondary : Theme.accent)
+        .buttonStyle(.bordered).tint(iconOnly ? Theme.textSecondary : Theme.accent)
         .accessibilityLabel(iconOnly ? "More version actions" : "Manage version")
         .disabled(isInstalling)
     }
@@ -454,7 +457,7 @@ struct AgentDetailView: View {
         EditorSection(title: "Advanced", footer: "Raw \(nativeConfigLabel). Edits here override the fields above on save.") {
             VStack(spacing: 0) {
                 Button {
-                    withAnimation(.snappy(duration: 0.2)) { showNativeConfig.toggle() }
+                    withAnimation(.easeInOut(duration: 0.2)) { showNativeConfig.toggle() }
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: "curlybraces")
@@ -499,7 +502,7 @@ struct AgentDetailView: View {
         } label: {
             Label("Clear Binary Cache", systemImage: "trash").frame(maxWidth: .infinity).padding(.vertical, 4)
         }
-        .buttonStyle(.glass)
+        .buttonStyle(.bordered)
         .tint(Theme.danger)
         .disabled(isInstalling)
     }
@@ -643,7 +646,7 @@ private struct FlowFixButtons: View {
                 Button { onTap(fix) } label: {
                     Text(fix.label).font(.caption.weight(.medium)).padding(.horizontal, 10).padding(.vertical, 5)
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(.bordered)
                 .tint(Theme.accent)
                 .disabled(disabled)
             }
@@ -651,4 +654,3 @@ private struct FlowFixButtons: View {
         }
     }
 }
-

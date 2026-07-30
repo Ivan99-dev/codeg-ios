@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Pi (self-extensible coding agent) config model — ported from the web
 // `PiConfigPanel`. pi has three concerns, each with its own store:

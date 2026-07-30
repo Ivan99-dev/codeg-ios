@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Decode-only models for the compose-bar "+" menu's insert sources, mirroring
 /// the web client's add-menu (`message-input.tsx`): Quick Messages, Expert

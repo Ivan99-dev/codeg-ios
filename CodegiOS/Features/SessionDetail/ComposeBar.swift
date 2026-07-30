@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import PhotosUI
 
 /// The pinned bottom compose bar. A leading "+" sits to the left of a growing
@@ -74,7 +75,7 @@ struct ComposeBar: View {
                         // `xl` radius clamps to a capsule while the field is one
                         // line (rhyming with the round +/send buttons) and relaxes
                         // to a rounded rect as it grows — no hard switch needed.
-                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
+                        .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
                         .hairlineBorder(Theme.Radius.xl)
 
                     actionButton
@@ -101,7 +102,7 @@ struct ComposeBar: View {
             matching: .images,
             photoLibrary: .shared()
         )
-        .onChange(of: photoItems) { _, items in handlePhotoItems(items) }
+        .onChange(of: photoItems) { items in handlePhotoItems(items) }
         .fullScreenCover(isPresented: $showCamera) {
             CameraPicker { image in addCaptured(image) }
                 .ignoresSafeArea()
@@ -121,8 +122,7 @@ struct ComposeBar: View {
         .animation(Theme.Motion.expand, value: attachments)
         // Width + keyboard-gap shift on focus change, kept just slightly slower
         // than the keyboard's own animation so the bar settles into place.
-        .animation(.snappy(duration: 0.26), value: focused)
-        .sensoryFeedback(.impact(weight: .light, intensity: 0.7), trigger: sendHaptic)
+        .animation(.easeInOut(duration: 0.26), value: focused)
     }
 
     // MARK: - Buttons
@@ -161,7 +161,7 @@ struct ComposeBar: View {
                 .font(.system(size: 16, weight: .semibold))
                 .frame(width: 26, height: 26)
         }
-        .buttonStyle(.glass)
+        .buttonStyle(.bordered)
         .clipShape(Circle())
         .tint(Theme.textSecondary)
         .accessibilityLabel("Add or insert")
@@ -175,7 +175,7 @@ struct ComposeBar: View {
                     .font(.system(size: 16, weight: .bold))
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.borderedProminent)
             .tint(Theme.danger)
             .clipShape(Circle())
             .transition(.scale.combined(with: .opacity))
@@ -186,7 +186,7 @@ struct ComposeBar: View {
                     .font(.system(size: 16, weight: .bold))
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glassProminent)
+            .buttonStyle(.borderedProminent)
             .tint(Theme.accent)
             .clipShape(Circle())
             .disabled(!canSend)
@@ -276,7 +276,7 @@ private struct NoticeBanner: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+        .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
         .hairlineBorder(Theme.Radius.md, color: Theme.accent.opacity(0.35))
         .transition(.opacity.combined(with: .move(edge: .bottom)))
     }

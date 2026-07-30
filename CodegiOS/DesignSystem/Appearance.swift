@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// The app's theme mode. `.system` follows the device's light/dark setting.
 enum AppearanceMode: String, CaseIterable, Identifiable {
@@ -40,8 +40,7 @@ enum AppearanceMode: String, CaseIterable, Identifiable {
 /// and mutate it; `mode` drives `.preferredColorScheme` and `accent` drives the
 /// `\.codegAccent` trait bridge, both applied once in `RootView`.
 @MainActor
-@Observable
-final class AppearanceStore {
+final class AppearanceStore: ObservableObject {
     private static let modeKey = "codeg.appearance.mode"
     private static let accentKey = "codeg.appearance.accent"
 

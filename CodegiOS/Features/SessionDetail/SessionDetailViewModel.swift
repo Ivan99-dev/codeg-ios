@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Drives the session detail screen: loads the transcript, sends prompts, and
 /// consumes the live ACP event stream — mapping each event onto the in-flight
@@ -8,8 +8,7 @@ import Observation
 /// (the consuming `Task` is main-actor isolated, so `for await` hops back to the
 /// main actor on every frame).
 @MainActor
-@Observable
-final class SessionDetailViewModel {
+final class SessionDetailViewModel: ObservableObject {
 
     // MARK: - Load phase
 

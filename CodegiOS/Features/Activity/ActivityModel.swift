@@ -1,5 +1,5 @@
 import Foundation
-import Observation
+import Combine
 
 /// App-wide pulse of the selected server: a periodically refreshed snapshot of
 /// its folders + conversations, from which the Activity tab, the bottom
@@ -10,8 +10,7 @@ import Observation
 /// (M4 in the redesign plan): the consumers are already shaped for live data,
 /// only this data source swaps later.
 @MainActor
-@Observable
-final class ActivityModel {
+final class ActivityModel: ObservableObject {
     private(set) var conversations: [ConversationSummary] = []
     /// The full folder set (`list_all_folder_details`) — for by-id lookups
     /// (`folderNames`, a conversation's folder by id, incl. worktree/chat folders).

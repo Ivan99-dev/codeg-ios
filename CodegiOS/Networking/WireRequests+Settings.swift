@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Request bodies for the Settings feature's server calls. camelCase property
 // names go on the wire verbatim (the shared encoder applies no key strategy), so

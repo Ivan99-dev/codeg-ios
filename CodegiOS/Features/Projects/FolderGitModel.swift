@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Drives the git **operations** layered onto a folder's Changes / Commits tabs:
 /// commit, push, pull, fetch, and the per-file working-tree actions (discard,
@@ -10,8 +11,7 @@ import SwiftUI
 /// accounts, and on an `authentication_failed` error prompt for a token (GitHub)
 /// or username/password (other hosts) and retry.
 @MainActor
-@Observable
-final class FolderGitModel {
+final class FolderGitModel: ObservableObject {
     let client: CodegClient
     let rootPath: String
     let folderId: Int?

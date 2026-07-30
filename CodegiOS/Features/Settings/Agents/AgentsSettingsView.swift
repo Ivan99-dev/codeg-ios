@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The server's agents: a reorderable list (drag in edit mode → `acp_reorder_agents`)
 /// where each row carries an instant enable toggle and taps through to a detail
@@ -25,12 +26,12 @@ struct AgentsSettingsView: View {
         .navigationTitle("Agents")
         .navigationBarTitleDisplayMode(horizontalSizeClass == .compact ? .large : .automatic)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 if model.agents.count > 1 { EditButton().tint(Theme.accent) }
             }
         }
         .overlay(alignment: .bottom) { toastView }
-        .animation(.snappy(duration: 0.25), value: model.toast)
+        .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
     }
 
@@ -88,7 +89,7 @@ struct AgentsSettingsView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 11)
-                .glassEffect(.regular.tint(Theme.accent.opacity(0.18)), in: Capsule())
+                .background(Theme.accent.opacity(0.14), in: Capsule())
                 .padding(.horizontal, 24)
                 .padding(.bottom, 18)
                 .transition(.move(edge: .bottom).combined(with: .opacity))

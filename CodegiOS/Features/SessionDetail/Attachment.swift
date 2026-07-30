@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import UniformTypeIdentifiers
 
 /// An image the user has attached to the next prompt. Image-only for now: the

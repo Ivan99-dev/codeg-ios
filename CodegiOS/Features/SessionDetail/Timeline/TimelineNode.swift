@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// One node on the transcript timeline. The whole transcript — persisted turns,
 /// optimistic pending user turns, and the live streaming turn — flattens into a

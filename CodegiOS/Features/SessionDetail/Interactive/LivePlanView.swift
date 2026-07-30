@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The agent's live plan / TODO checklist, rebuilt from `plan_update` events (or a
 /// reattach snapshot). Display only — it never blocks the turn. Rendered inside the

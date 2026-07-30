@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// A configured OpenAI-compatible model provider endpoint for a given agent.
 /// Mirrors the server's `ModelProviderInfo`. We intentionally do NOT decode the

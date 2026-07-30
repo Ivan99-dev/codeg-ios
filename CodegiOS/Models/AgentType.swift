@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The coding agents codeg can drive. Wire value is snake_case (serde
 /// `rename_all = "snake_case"` on the Rust `AgentType` enum). Enum *values*

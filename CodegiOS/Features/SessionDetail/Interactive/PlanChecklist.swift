@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The visual shape one plan row renders from — the shared model every "Agent
 /// Plan" surface maps its entries into, so the live checklist (`LivePlanView`)

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A horizontal strip of attached-image thumbnails shown above the compose
 /// field, each with a remove button. Mirrors the web client's attachment row in

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Clone a git repository onto the server, presented as a sheet from the Folders
 /// tab "+" menu. Mirrors codeg's desktop Clone dialog: enter a repo URL + a
@@ -101,7 +102,7 @@ struct CloneRepoView: View {
                     } label: {
                         Image(systemName: "folder")
                     }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.bordered)
                     .tint(Theme.accent)
                     .disabled(cloning)
                     .accessibilityLabel("Browse")

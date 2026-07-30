@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Root of the system search tab: server-side search across the selected
 /// server's conversations (`list_all_conversations` with `search`), debounced

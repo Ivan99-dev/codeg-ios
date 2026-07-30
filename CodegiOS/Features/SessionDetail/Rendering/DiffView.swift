@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Renders parsed unified-diff files inline: a per-file header (mode badge,
 /// path, +adds / −dels) over green/red rows with dual old/new line-number
@@ -114,7 +115,7 @@ private struct DiffFileView: View {
 
     private var expandToggle: some View {
         Button {
-            withAnimation(.snappy(duration: 0.2)) { expanded.toggle() }
+            withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
         } label: {
             (expanded ? Text("Show less") : Text("Show \(rowCount - collapsedRowLimit) more lines"))
                 .font(.system(size: 10, weight: .semibold))

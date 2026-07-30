@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The three chat-channel backends codeg supports (`channel_type` on the wire).
 /// The set is closed and authoritative server-side, so this stays a strict enum.

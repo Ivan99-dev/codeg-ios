@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Renders a single `ContentBlock` in isolation. The assistant transcript no
 /// longer uses this directly — it is flattened into timeline nodes (`NodeBody`),
@@ -55,7 +56,7 @@ struct ReasoningBlock: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Button {
-                withAnimation(.snappy(duration: 0.22)) { expanded.toggle() }
+                withAnimation(.easeInOut(duration: 0.22)) { expanded.toggle() }
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "brain")
@@ -87,14 +88,14 @@ struct ReasoningBlock: View {
         .background(Theme.surfaceNested, in: RoundedRectangle(cornerRadius: Theme.Radius.sm, style: .continuous))
         .hairlineBorder(Theme.Radius.sm, color: Theme.hairline)
         .onAppear { if streaming { expanded = true } }
-        .onChange(of: streaming) { _, nowStreaming in
+        .onChange(of: streaming) { nowStreaming in
             if nowStreaming {
                 expanded = true
             } else if !didAutoCollapse {
                 didAutoCollapse = true
                 Task { @MainActor in
                     try? await Task.sleep(for: .seconds(1.0))
-                    withAnimation(.snappy(duration: 0.25)) { expanded = false }
+                    withAnimation(.easeInOut(duration: 0.25)) { expanded = false }
                 }
             }
         }

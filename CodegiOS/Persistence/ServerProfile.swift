@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// A saved codeg server connection. The auth token is NOT stored here — it
 /// lives in the Keychain keyed by `id`. Metadata persists in UserDefaults.

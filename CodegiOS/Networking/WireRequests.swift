@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// A block of a prompt sent to an agent (Rust `PromptInputBlock`, tagged by
 /// `type`). Encode-only. The request encoder does NOT convert keys, so the

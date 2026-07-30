@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // Visual rendering for tool-call *input arguments* and *output*, so an MCP /
 // generic tool call reads as structured fields and clean terminal/markdown
@@ -566,7 +567,7 @@ struct FileBodyView: View {
 
     private var expandToggle: some View {
         Button {
-            withAnimation(.snappy(duration: 0.2)) { expanded.toggle() }
+            withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
         } label: {
             (expanded ? Text("Show less") : Text("Show \(lines.count - collapsedLineLimit) more lines"))
                 .font(.system(size: 10, weight: .semibold))

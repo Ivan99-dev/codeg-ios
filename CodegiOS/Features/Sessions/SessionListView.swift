@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import Combine
 
 /// Lists a server's conversations grouped by folder (the iPad split's middle
 /// column / the iPhone "Chats" tab root): a "Pinned" group on top, then one
@@ -94,12 +95,12 @@ struct SessionListView: View {
         .toolbarTitleDisplayMode(serverSwitcher == nil ? .automatic : .inline)
         .toolbar {
             if let serverSwitcher {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     serverTitleMenu(serverSwitcher)
                 }
             }
             if let onNewSession {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: onNewSession) {
                         // A compose/pencil glyph (matches codeg's "new" icon)
                         // reads more clearly as "start a task" than a bare "+".

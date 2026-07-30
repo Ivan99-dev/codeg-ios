@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Add / Edit a GitHub account. On add: enter server URL + token, Validate (which
 /// fetches the username/scopes), then Save. On edit: the server/username are the

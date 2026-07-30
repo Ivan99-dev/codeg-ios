@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// A decoded arbitrary JSON value. Holds the freeform `tool_call` blob carried by
 /// a `permission_request` event (Rust `serde_json::Value`).

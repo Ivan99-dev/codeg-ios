@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Prompts for git remote credentials when a push/pull/fetch fails to
 /// authenticate, then hands them back to ``FolderGitModel/withCredentialRetry(_:)``

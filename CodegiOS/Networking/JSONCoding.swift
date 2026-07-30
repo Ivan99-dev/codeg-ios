@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Shared JSON coders configured for codeg's split casing convention:
 /// requests are camelCase (default encoder, no key conversion) and responses

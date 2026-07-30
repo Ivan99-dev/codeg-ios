@@ -1,12 +1,11 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Per-agent skill files. Loads the server's usable agents, then the selected
 /// agent's skills (global scope — folder-scoped skills are deferred to a later
 /// pass, since they need a workspace picker). CRUD mirrors the web's skills page.
 @MainActor
-@Observable
-final class SkillsSettingsModel {
+final class SkillsSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

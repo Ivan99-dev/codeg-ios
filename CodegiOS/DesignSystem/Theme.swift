@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import UIKit
 
 /// Design tokens for the codeg app — a Codex-like developer aesthetic with a
@@ -95,11 +96,11 @@ enum Theme {
     /// user-initiated jumps. The streaming auto-follow scroll is deliberately NOT
     /// animated (animating per 50ms chunk stutters) — it stays a plain `scrollTo`.
     enum Motion {
-        static let chrome = Animation.snappy(duration: 0.24)
-        static let content = Animation.smooth(duration: 0.26)
-        static let expand = Animation.snappy(duration: 0.22)
-        static let press = Animation.snappy(duration: 0.12)
-        static let scroll = Animation.snappy(duration: 0.30)
+        static let chrome = Animation.easeInOut(duration: 0.24)
+        static let content = Animation.easeInOut(duration: 0.26)
+        static let expand = Animation.easeInOut(duration: 0.22)
+        static let press = Animation.easeInOut(duration: 0.12)
+        static let scroll = Animation.easeInOut(duration: 0.30)
     }
 
     /// Reading-text tokens for assistant/user message bodies. Semantic fonts so

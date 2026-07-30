@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Add / Edit a model provider. Mirrors the web add/edit dialogs:
 /// - agent picker limited to `AgentType.modelProviderSupported`;

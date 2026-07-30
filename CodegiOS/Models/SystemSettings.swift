@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// `get_system_proxy_settings`. Update is sent raw as `{settings:{enabled,proxy_url}}`.
 struct SystemProxySettings: Decodable, Sendable {

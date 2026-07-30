@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The inline card for a `question_request` (`ask_user_question`). Pinned above
 /// the compose bar while the agent is blocked. Mirrors codeg web's

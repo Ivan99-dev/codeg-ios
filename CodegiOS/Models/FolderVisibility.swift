@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Pure folder-visibility + branch-switch routing, ported from the codeg web
 /// client (`src/lib/folder-display.ts`, `src/lib/branch-switch.ts`,

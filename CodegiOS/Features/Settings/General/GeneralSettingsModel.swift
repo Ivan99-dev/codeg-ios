@@ -1,13 +1,12 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// General settings: multi-agent delegation (round-tripped as raw JSON to
 /// preserve `agent_defaults`), plus the ask-question and live-feedback toggles.
 /// Delegation scalar edits are debounced so a stepper drag doesn't spam the
 /// server (and only the final value is persisted).
 @MainActor
-@Observable
-final class GeneralSettingsModel {
+final class GeneralSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

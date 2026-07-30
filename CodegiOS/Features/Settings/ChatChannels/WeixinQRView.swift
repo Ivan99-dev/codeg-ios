@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import UIKit
 
 /// WeChat connect: fetch a login QR (`weixin_get_qrcode`), render it, and poll
@@ -87,7 +88,7 @@ struct WeixinQRView: View {
         Button { attempt += 1 } label: {
             Label("Refresh QR Code", systemImage: "arrow.clockwise")
         }
-        .buttonStyle(.glass)
+        .buttonStyle(.bordered)
         .tint(Theme.accent)
     }
 

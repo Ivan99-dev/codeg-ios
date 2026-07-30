@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Per-agent preflight diagnostics (`acp_preflight`). `status` is kept as a raw
 /// string (lenient) so an unknown future check status can't fail the decode; the

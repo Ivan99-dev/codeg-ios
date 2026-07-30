@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Version Control: git availability + custom path override, and GitHub accounts
 /// (add/edit with token validation, set-default, delete).
@@ -32,7 +33,7 @@ struct VersionControlSettingsView: View {
         }
         .screenTitle("Version Control", compact: horizontalSizeClass == .compact)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { editorRoute = .add } label: { Image(systemName: "plus") }
                     .tint(Theme.accent)
                     .accessibilityLabel("Add GitHub Account")
@@ -65,7 +66,7 @@ struct VersionControlSettingsView: View {
             Text("Removes @\(account.username) (\(account.host)) and its stored token.")
         }
         .overlay(alignment: .bottom) { toastView }
-        .animation(.snappy(duration: 0.25), value: model.toast)
+        .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
     }
 
@@ -131,10 +132,10 @@ struct VersionControlSettingsView: View {
                         Text("Test")
                     }
                 }
-                .buttonStyle(.glass).tint(Theme.accent)
+                .buttonStyle(.bordered).tint(Theme.accent)
                 .disabled(model.testing || model.customPath.trimmingCharacters(in: .whitespaces).isEmpty)
                 Button("Save Path") { Task { await model.saveCustomPath() } }
-                    .buttonStyle(.glassProminent).tint(Theme.accent)
+                    .buttonStyle(.borderedProminent).tint(Theme.accent)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 16).padding(.vertical, 11)
@@ -182,7 +183,7 @@ struct VersionControlSettingsView: View {
                 .foregroundStyle(Theme.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16).padding(.vertical, 11)
-                .glassEffect(.regular.tint(Theme.accent.opacity(0.18)), in: Capsule())
+                .background(Theme.accent.opacity(0.14), in: Capsule())
                 .padding(.horizontal, 24).padding(.bottom, 18)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .task(id: toast) {

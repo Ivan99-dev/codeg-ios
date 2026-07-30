@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Settings root — a tab on iPhone, a sheet on iPad. An iOS-Settings-style
 /// grouped list: the twelve entries are gathered into four labeled sections
@@ -13,8 +14,8 @@ struct SettingsView: View {
     @Binding var selectedServerID: ServerProfile.ID?
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(AppearanceStore.self) private var appearance
-    @Environment(LanguageStore.self) private var language
+    @EnvironmentObject private var appearance: AppearanceStore
+    @EnvironmentObject private var language: LanguageStore
 
     /// Live server version, fetched from `health`, pre-loaded here so the pushed
     /// About screen has it ready.

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Add / Edit an MCP server: an id (locked on edit), the raw JSON spec, and the
 /// set of agent apps it's enabled for. Save validates the spec is a JSON object,

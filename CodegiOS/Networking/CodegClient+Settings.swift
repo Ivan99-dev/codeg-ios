@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Settings-feature server calls, kept in an extension so `CodegClient.swift`
 /// stays focused on the chat/session core. All use the same `POST /api/<name>`

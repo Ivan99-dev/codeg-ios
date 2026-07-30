@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Status of a live ACP connection (Rust `ConnectionStatus`).
 enum ConnectionStatus: String, Codable, Hashable, Sendable {

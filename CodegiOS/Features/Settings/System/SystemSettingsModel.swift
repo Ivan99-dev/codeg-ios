@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// System settings: HTTP proxy, reply/UI language, default terminal shell, and a
 /// read-only update check. Proxy / language / terminal each persist through their
@@ -7,8 +7,7 @@ import Observation
 /// drops the final value; reconcile to server truth on failure). The wrapped
 /// `{settings:{snake_case}}` bodies are built raw by the client.
 @MainActor
-@Observable
-final class SystemSettingsModel {
+final class SystemSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

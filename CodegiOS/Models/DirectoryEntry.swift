@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// One subdirectory returned by `list_directory_entries` for the server-side
 /// directory browser. The server lists directories only; `hasChildren` says

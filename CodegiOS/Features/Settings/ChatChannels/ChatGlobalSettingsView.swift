@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Global (cross-channel) chat behavior: the command prefix, the bot's reply
 /// language, which events get forwarded, and outbound webhooks. Each control
@@ -172,8 +172,7 @@ struct WebhookItem: Identifiable, Equatable {
 /// drops the final value); on failure the displayed value reconciles to server
 /// truth.
 @MainActor
-@Observable
-final class ChatGlobalSettingsModel {
+final class ChatGlobalSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

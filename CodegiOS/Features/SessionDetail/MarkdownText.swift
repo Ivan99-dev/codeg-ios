@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Renders a string as inline Markdown, gracefully degrading to plain text when
 /// the string is not valid Markdown. Used for user bubbles and assistant text

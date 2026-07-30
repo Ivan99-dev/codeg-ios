@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// The visual lifecycle of a tool call. Persisted calls are `.done`/`.error`
 /// (paired with their result) or `.running` (no result block); live calls move

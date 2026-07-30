@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// A live WebSocket to `/ws/events` that surfaces **only** the terminal firehose
 /// frames. PTY output/exit are broadcast by the server as legacy

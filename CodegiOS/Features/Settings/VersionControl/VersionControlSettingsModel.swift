@@ -1,11 +1,10 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Version Control settings: git availability + a custom git path override, and
 /// the GitHub accounts list (full-replace metadata + per-account keyring token).
 @MainActor
-@Observable
-final class VersionControlSettingsModel {
+final class VersionControlSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

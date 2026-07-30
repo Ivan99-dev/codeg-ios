@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A folder's uncommitted working-tree changes (`git_status`): each changed file
 /// with a status badge. Tapping a tracked change shows its diff against HEAD; an
@@ -25,7 +26,7 @@ struct FolderChangesView: View {
         content
             .task { if !loaded { await load() } }
             // Reload after any working-tree mutation (commit/discard/stage/delete/pull).
-            .onChange(of: model.reloadToken) { Task { await load(force: true) } }
+            .onChange(of: model.reloadToken) { _ in Task { await load(force: true) } }
             .confirmationDialog(
                 "Discard Changes",
                 isPresented: confirmBinding($pendingDiscard),

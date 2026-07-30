@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// An App Store editorial-style card wrapping one session group (Pinned / a
 /// folder / Running / Last 24 Hours). It shows the group header plus a capped
@@ -166,7 +167,7 @@ struct SessionSectionFullScreen: View {
             // (App Store look) instead of sitting on a visible band above the title.
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: onClose) {
                         Image(systemName: "xmark")
                             .font(.system(size: 15, weight: .bold))

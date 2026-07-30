@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The Activity tab: a live monitor of what your agents are doing right now and
 /// what just finished — running sessions on top, then everything touched in the
@@ -122,7 +123,6 @@ struct ActivityView: View {
         .animation(Theme.Motion.chrome, value: running.map(\.id))
         .animation(Theme.Motion.chrome, value: recent.map(\.id))
         // A soft tick when a user pull-to-refresh lands (not the initial load).
-        .sensoryFeedback(.impact(flexibility: .soft), trigger: pullTick)
     }
 
     /// One directly-tappable session row (opens in a single tap). Mirrors

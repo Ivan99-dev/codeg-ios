@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A parsed block of Markdown. Inline spans (bold, italic, code, links) are
 /// pre-parsed into `AttributedString` at parse time so the whole block list can

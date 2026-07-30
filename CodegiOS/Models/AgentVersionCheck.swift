@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// A client-only install/upgrade/uninstall action (mirrors the web's UI-only
 /// `UiFixAction` kinds — distinct from the server's ``FixActionKind``). The raw

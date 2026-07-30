@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Typed errors surfaced by `CodegClient`.
 enum APIError: LocalizedError, Sendable {

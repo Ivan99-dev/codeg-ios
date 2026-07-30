@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A titled glass section grouping related fields, with an optional footer.
 /// Shared by the editor-style sheets (Add/Edit Server, Clone Repository).

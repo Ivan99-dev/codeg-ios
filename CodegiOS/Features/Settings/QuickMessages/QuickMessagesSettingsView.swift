@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Reusable message templates the user can insert into the chat composer.
 /// Reorderable + deletable (a `List` for `.onMove` / `.onDelete`, styled to the
@@ -30,12 +31,12 @@ struct QuickMessagesSettingsView: View {
         }
         .screenTitle("Quick Messages", compact: horizontalSizeClass == .compact)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { editorRoute = .add } label: { Image(systemName: "plus") }
                     .tint(Theme.accent)
                     .accessibilityLabel("Add Quick Message")
             }
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 if !model.items.isEmpty { EditButton().tint(Theme.accent) }
             }
         }

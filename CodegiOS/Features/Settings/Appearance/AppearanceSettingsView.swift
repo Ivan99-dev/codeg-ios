@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Appearance settings: the theme mode (Light / Dark / System) and the accent
 /// color scheme. Both are purely local (device-scoped) preferences held in
@@ -10,7 +11,7 @@ import SwiftUI
 /// when the screen is presented in a separate hosting controller — the iPad
 /// Settings sheet — which the bridged trait can't reach.
 struct AppearanceSettingsView: View {
-    @Environment(AppearanceStore.self) private var appearance
+    @EnvironmentObject private var appearance: AppearanceStore
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.colorScheme) private var colorScheme
 
@@ -108,7 +109,7 @@ struct AppearanceSettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .animation(.snappy(duration: 0.2), value: isSelected)
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
     }
 
     // MARK: - Live preview

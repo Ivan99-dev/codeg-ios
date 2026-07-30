@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Draft new-session controls surfaced inside the agent button's sheet: pick the
 /// agent + folder before the first send. `nil` for an existing conversation,
@@ -85,9 +86,8 @@ struct AgentOptionsButton: View {
                 dismissSheet: { showSheet = false }
             )
             .presentationDetents([.medium, .large])
-            .presentationBackground(Theme.bg)
         }
-        .onChange(of: showSheet) { _, shown in
+        .onChange(of: showSheet) { shown in
             if shown { options.prepare(agentType: agentType, workingDir: workingDir) }
         }
     }
@@ -152,7 +152,7 @@ private struct AgentOptionsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }
                         .foregroundStyle(Theme.accent)
                 }
@@ -178,7 +178,7 @@ private struct AgentOptionsSheet: View {
                 .padding(.vertical, 10)
                 // Animate the selection ring + scale pop when the chosen agent
                 // changes (the "transition" the picker was missing).
-                .animation(.snappy(duration: 0.26), value: ns.selectedAgent)
+                .animation(.easeInOut(duration: 0.26), value: ns.selectedAgent)
             }
             // Soft-fade both edges instead of letting chips spill past the card's
             // rounded background. The mask also clips the row to its bounds, so a
@@ -376,7 +376,7 @@ private struct AgentOptionsSheet: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+        .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
         .hairlineBorder(Theme.Radius.md)
     }
 
@@ -387,7 +387,7 @@ private struct AgentOptionsSheet: View {
                 .foregroundStyle(Theme.danger)
                 .fixedSize(horizontal: false, vertical: true)
             Button("Try Again") { options.load() }
-                .buttonStyle(.glass)
+                .buttonStyle(.bordered)
                 .tint(Theme.accent)
         }
         .padding(14)
@@ -511,7 +511,7 @@ struct OptionSection<Content: View>: View {
                 .foregroundStyle(Theme.textTertiary)
                 .padding(.horizontal, 4)
             VStack(spacing: 0) { content() }
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+                .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
                 .hairlineBorder(Theme.Radius.md)
         }
     }

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import UIKit
 
 /// The per-agent brand icon, mirroring the web client's `AgentIcon`

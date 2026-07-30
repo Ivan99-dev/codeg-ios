@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The inline approval card for a `permission_request` — and for ExitPlanMode,
 /// whose proposed plan renders in the body. Pinned above the compose bar while

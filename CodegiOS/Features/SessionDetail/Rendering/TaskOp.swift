@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Pure (view-free) parsing for the harness task-management tools — `TaskCreate`,
 // `TaskUpdate`, `TaskList`, `TaskGet` — so a run of them renders as one evolving

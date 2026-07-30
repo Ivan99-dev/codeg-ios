@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Add / Edit a quick-message template. Title + multi-line content, Save gated on
 /// both being non-empty. The caller supplies an async `onSave` (create or update)

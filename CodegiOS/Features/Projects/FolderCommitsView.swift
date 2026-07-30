@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A folder's commit history (`git_log`): the most recent commits, each a row of
 /// subject + author/time/hash + change counts. Tapping a commit pushes
@@ -27,7 +28,7 @@ struct FolderCommitsView: View {
                 await loadPushInfo()
             }
             // After a remote op (push/pull/fetch) the pushed flags + push info change.
-            .onChange(of: model.reloadToken) {
+            .onChange(of: model.reloadToken) { _ in
                 Task {
                     await load(force: true)
                     await loadPushInfo()

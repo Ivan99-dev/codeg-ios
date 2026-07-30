@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Channel detail: enable toggle, connect / disconnect / test (or WeChat QR),
 /// token status, config summary, and a recent message log. Editing the channel
@@ -43,12 +43,12 @@ struct ChatChannelDetailView: View {
         .navigationTitle(channel.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Edit") { showEdit = true }.tint(Theme.accent)
             }
         }
         .overlay(alignment: .bottom) { toastView }
-        .animation(.snappy(duration: 0.25), value: model.toast)
+        .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
         .sheet(isPresented: $showEdit) {
             ChatChannelEditorSheet(editing: channel, client: client) { _, _, _, _, _, _, _ in
@@ -148,7 +148,7 @@ struct ChatChannelDetailView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 4)
         }
-        .buttonStyle(.glass)
+        .buttonStyle(.bordered)
         .tint(role == .destructive ? Theme.danger : Theme.accent)
         .disabled(model.busy)
     }
@@ -215,7 +215,7 @@ struct ChatChannelDetailView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 11)
-                .glassEffect(.regular.tint(Theme.accent.opacity(0.18)), in: Capsule())
+                .background(Theme.accent.opacity(0.14), in: Capsule())
                 .padding(.horizontal, 24)
                 .padding(.bottom, 18)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -258,8 +258,7 @@ private struct MessageLogRow: View {
 /// serial sender so rapid flips can't land out of order). `onChanged` reloads the
 /// parent list and is called only after a mutation succeeds.
 @MainActor
-@Observable
-final class ChatChannelDetailModel {
+final class ChatChannelDetailModel: ObservableObject {
     private(set) var channel: ChatChannelInfo
     private(set) var status: ChannelConnectionStatus = .disconnected
     private(set) var messages: [ChatChannelMessageLog] = []

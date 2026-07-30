@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Server-side directory browser, presented as a sheet. Browses the *server's*
 /// filesystem (the folder we want lives on the remote host, not this device) via
@@ -37,7 +38,7 @@ struct DirectoryBrowserView: View {
                     Button("Cancel") { dismiss() }
                         .tint(Theme.textSecondary)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button { Task { await goHome() } } label: {
                         Image(systemName: "house")
                     }
@@ -60,7 +61,7 @@ struct DirectoryBrowserView: View {
                 Image(systemName: "chevron.up")
                     .font(.body.weight(.semibold))
             }
-            .buttonStyle(.glass)
+            .buttonStyle(.bordered)
             .tint(Theme.accent)
             .disabled(isRoot || isLoading)
             .accessibilityLabel("Up")

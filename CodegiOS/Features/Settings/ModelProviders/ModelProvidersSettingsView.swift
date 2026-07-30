@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Custom OpenAI-compatible model-provider endpoints, grouped by agent. List +
 /// add / edit / delete; no reordering, so it uses the ScrollView + LazyVStack
@@ -35,7 +36,7 @@ struct ModelProvidersSettingsView: View {
         .navigationTitle("Model Providers")
         .navigationBarTitleDisplayMode(horizontalSizeClass == .compact ? .large : .automatic)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { editorRoute = .add } label: { Image(systemName: "plus") }
                     .tint(Theme.accent)
                     .accessibilityLabel("Add Model Provider")
@@ -57,7 +58,7 @@ struct ModelProvidersSettingsView: View {
             Text("Remove “\(provider.name)”. Running sessions that use it must be restarted.")
         }
         .overlay(alignment: .bottom) { toastView }
-        .animation(.snappy(duration: 0.25), value: model.toast)
+        .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
     }
 
@@ -125,7 +126,7 @@ struct ModelProvidersSettingsView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 11)
-                .glassEffect(.regular.tint(Theme.accent.opacity(0.18)), in: Capsule())
+                .background(Theme.accent.opacity(0.14), in: Capsule())
                 .padding(.horizontal, 24)
                 .padding(.bottom, 18)
                 .transition(.move(edge: .bottom).combined(with: .opacity))

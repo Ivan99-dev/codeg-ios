@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The session detail transcript: header, live-streaming message transcript, and
 /// a pinned compose bar. This is the app's showcase screen — the agent's reply
@@ -61,7 +62,7 @@ struct SessionDetailView: View {
             // the title. Shown once loaded; for an editable draft its sheet also
             // hosts the Agent + Folder pickers, otherwise just Mode/config.
             if case .loaded = model.phase {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     AgentOptionsButton(
                         agentType: model.agentTypeForUI,
                         workingDir: model.folder?.path,
@@ -95,7 +96,7 @@ struct SessionDetailView: View {
                 // menu). The session banner used to carry this identity inline;
                 // it now lives behind "Session Details".
                 if model.canManageConversation {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .navigationBarTrailing) {
                         SessionActionsMenu(
                             model: model,
                             onRename: {
@@ -136,21 +137,6 @@ struct SessionDetailView: View {
         // failed, warning = the agent needs you (a permission / question card
         // appeared), selection = pin / status toggles. The send impact lives in
         // ComposeBar (fired on the tap itself, for immediate feedback).
-        .sensoryFeedback(.success, trigger: model.completedTurnTick)
-        .sensoryFeedback(trigger: model.sendState) { _, new in
-            if case .error = new { return .error }
-            return nil
-        }
-        .sensoryFeedback(trigger: model.pendingPermission?.requestId) { _, new in
-            new != nil ? .warning : nil
-        }
-        .sensoryFeedback(trigger: model.pendingQuestion?.questionId) { _, new in
-            new != nil ? .warning : nil
-        }
-        .sensoryFeedback(trigger: model.pendingPlanApproval?.approvalId) { _, new in
-            new != nil ? .warning : nil
-        }
-        .sensoryFeedback(.selection, trigger: model.userToggleTick)
     }
 
     private var content: some View {
@@ -212,8 +198,8 @@ struct SessionDetailView: View {
             .padding(.bottom, 6)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .animation(.snappy(duration: 0.28), value: model.pendingUserTurns)
-        .animation(.snappy(duration: 0.28), value: model.liveTurn?.id)
+        .animation(.easeInOut(duration: 0.28), value: model.pendingUserTurns)
+        .animation(.easeInOut(duration: 0.28), value: model.liveTurn?.id)
         .safeAreaInset(edge: .bottom) {
             // The "jump to latest" affordance sits in the compose-bar inset — not
             // as a `List` overlay — so it is reliably above the bar and tappable
@@ -276,10 +262,10 @@ struct SessionDetailView: View {
                     insertModel: model.insertModel
                 )
             }
-            .animation(.snappy(duration: 0.24), value: model.isPinnedToBottom)
-            .animation(.snappy(duration: 0.26), value: model.pendingPermission?.id)
-            .animation(.snappy(duration: 0.26), value: model.pendingQuestion?.id)
-            .animation(.snappy(duration: 0.26), value: model.pendingPlanApproval?.id)
+            .animation(.easeInOut(duration: 0.24), value: model.isPinnedToBottom)
+            .animation(.easeInOut(duration: 0.26), value: model.pendingPermission?.id)
+            .animation(.easeInOut(duration: 0.26), value: model.pendingQuestion?.id)
+            .animation(.easeInOut(duration: 0.26), value: model.pendingPlanApproval?.id)
         }
     }
 }
@@ -295,7 +281,7 @@ private struct JumpToLatestButton: View {
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(Theme.accent)
                 .frame(width: 40, height: 40)
-                .glassEffect(.regular, in: Circle())
+                .background(Theme.bgElevated, in: Circle())
                 .hairlineBorder(20)
                 // An explicit hit shape so the whole disc is tappable (and the
                 // tap can't slip past its edge into the transcript underneath).

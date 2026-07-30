@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// One folder's home: a compact identity header, then a browser over the
 /// folder's **files**, working-tree **changes**, and commit **history** — the
@@ -22,7 +23,7 @@ struct ProjectDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if folder != nil {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         if let folder { onNewSession(folder) }
                     } label: {
@@ -94,7 +95,6 @@ private struct FolderDetailContent: View {
     }
 
     var body: some View {
-        @Bindable var git = git
         VStack(spacing: 0) {
             // Pinned identity + tab selector; the selected tab scrolls below.
             // The picker is always shown — the cached `gitBranch` is an

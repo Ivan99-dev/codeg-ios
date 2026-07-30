@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// One commit from `git_log` (Rust `GitLogEntry`). `date` is an ISO8601 string
 /// (`git --format=%aI`); `files` is the per-file change summary so a commit's

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Add / Edit a chat channel. Mirrors the web add/edit dialogs:
 /// - channel type is chosen on add and immutable on edit (the update call has no

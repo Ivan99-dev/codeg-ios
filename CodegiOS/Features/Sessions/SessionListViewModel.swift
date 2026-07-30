@@ -1,5 +1,5 @@
 import Foundation
-import Observation
+import Combine
 
 /// Drives ``SessionListView``: loads folders + conversations for one server and
 /// derives the *grouped* display — a "Pinned" group plus one collapsible group
@@ -9,8 +9,7 @@ import Observation
 /// The full conversation list is kept in memory and grouped/filtered locally, so
 /// search typing and pin toggles stay instant without re-hitting the network.
 @MainActor
-@Observable
-final class SessionListViewModel {
+final class SessionListViewModel: ObservableObject {
     /// HTTP client for the current server. Swappable: if the selected server is
     /// edited in place (same identity, new URL/token), the view feeds in a fresh
     /// client via `reload(client:)` so subsequent fetches hit the new endpoint.

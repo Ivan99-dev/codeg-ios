@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The server management screen (reached via "Manage Servers…" in the Chats /
 /// sidebar title menu): saved codeg servers with live connection status and
@@ -41,7 +42,7 @@ struct ServerListView: View {
         }
         .navigationTitle("Servers")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     editorRoute = .add
                 } label: {

@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Pure parsing + status resolution for the delegation companion tools, ported
 // from the web client's `delegation-card.ts` (delegate_to_agent) and

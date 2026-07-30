@@ -1,12 +1,11 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Drives the Add / Edit Server sheet: holds the editable fields, validates
 /// them, and runs the standalone "Test Connection" probe against a throwaway
 /// `CodegClient` built from the entered values.
 @MainActor
-@Observable
-final class ServerEditorModel {
+final class ServerEditorModel: ObservableObject {
     /// Result of a "Test Connection" attempt, shown inline beneath the button.
     enum TestResult: Equatable {
         case success(version: String)

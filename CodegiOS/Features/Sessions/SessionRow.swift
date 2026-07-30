@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// One conversation row in ``SessionListView`` / ``ActivityView``: a single,
 /// borderless line. The agent's brand avatar (with a small status-tinted dot)

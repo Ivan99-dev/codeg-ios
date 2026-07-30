@@ -1,13 +1,12 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Top-level navigation + selection state shared by both shells. Owns the
 /// server store, the compact shell's per-tab navigation paths, the regular
 /// shell's sidebar/content/detail selection, and the app-wide activity poller
 /// that feeds the Activity tab and its badge.
 @MainActor
-@Observable
-final class AppModel {
+final class AppModel: ObservableObject {
     let serverStore: ServerStore
 
     /// App-wide pulse of the selected server (running sessions, recents,

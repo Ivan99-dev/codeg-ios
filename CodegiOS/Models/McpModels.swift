@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// MCP (Model Context Protocol) server configs installed on the server. Each is
 /// enabled for a set of agent "apps" and carries a free-form JSON `spec`.

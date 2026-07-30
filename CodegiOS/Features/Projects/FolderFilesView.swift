@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A folder's file browser: the immediate children of `dirPath`, directories
 /// first. Directories drill in (pushing another `FolderFilesView`); files open a
@@ -237,7 +238,7 @@ struct FilePreviewView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if let content, !content.isEmpty {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         UIPasteboard.general.string = content
                     } label: {

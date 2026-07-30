@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// System settings: proxy, language, default terminal shell, and a read-only
 /// update check. Each control persists on change via the model's coalescing
@@ -18,7 +19,7 @@ struct SystemSettingsView: View {
         }
         .screenTitle("System", compact: horizontalSizeClass == .compact)
         .overlay(alignment: .bottom) { toastView }
-        .animation(.snappy(duration: 0.25), value: model.toast)
+        .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
         .alert("Couldn’t Save", isPresented: Binding(
             get: { model.saveError != nil },
@@ -143,7 +144,7 @@ struct SystemSettingsView: View {
                             Text("Test")
                         }
                     }
-                    .buttonStyle(.glass).tint(Theme.accent)
+                    .buttonStyle(.bordered).tint(Theme.accent)
                     .disabled(model.probing || model.customShellPath.trimmingCharacters(in: .whitespaces).isEmpty)
                     if let probe = model.probeResult {
                         Label(probe ? "Executable found" : "Not found", systemImage: probe ? "checkmark.circle" : "xmark.circle")
@@ -223,7 +224,7 @@ struct SystemSettingsView: View {
                 .foregroundStyle(Theme.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16).padding(.vertical, 11)
-                .glassEffect(.regular.tint(Theme.accent.opacity(0.18)), in: Capsule())
+                .background(Theme.accent.opacity(0.14), in: Capsule())
                 .padding(.horizontal, 24).padding(.bottom, 18)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .task(id: toast) {

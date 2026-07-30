@@ -1,13 +1,12 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Loads + manages the server's agents. The list supports drag-reorder; the
 /// detail edits enabled + env vars + model-provider link via the single
 /// `acp_update_agent_env` call (which replaces all three together — so each
 /// write must carry the agent's current env).
 @MainActor
-@Observable
-final class AgentsSettingsModel {
+final class AgentsSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

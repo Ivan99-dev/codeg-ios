@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Result of `detect_git` / `test_git_path` — whether git is available and where.
 struct GitDetectResult: Decodable, Sendable {

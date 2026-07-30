@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Chat channels: a list (channel ⨝ live status) where each row pushes a detail
 /// for connect/test/logs, plus a "+" to add one and a row into the global message
@@ -27,7 +28,7 @@ struct ChatChannelsSettingsView: View {
         .navigationTitle("Chat Channels")
         .navigationBarTitleDisplayMode(horizontalSizeClass == .compact ? .large : .automatic)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { showAdd = true } label: { Image(systemName: "plus") }
                     .tint(Theme.accent)
                     .accessibilityLabel("Add Channel")
@@ -61,7 +62,7 @@ struct ChatChannelsSettingsView: View {
             Text("Remove “\(channel.name)” and its stored token.")
         }
         .overlay(alignment: .bottom) { toastView }
-        .animation(.snappy(duration: 0.25), value: model.toast)
+        .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
     }
 
@@ -179,7 +180,7 @@ struct ChatChannelsSettingsView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 11)
-                .glassEffect(.regular.tint(Theme.accent.opacity(0.18)), in: Capsule())
+                .background(Theme.accent.opacity(0.14), in: Capsule())
                 .padding(.horizontal, 24)
                 .padding(.bottom, 18)
                 .transition(.move(edge: .bottom).combined(with: .opacity))

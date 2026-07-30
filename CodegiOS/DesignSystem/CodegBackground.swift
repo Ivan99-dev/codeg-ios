@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// App-wide backdrop: near-black with two soft, blurred color glows for depth.
 /// Sits behind Liquid Glass surfaces so their translucency reads.
@@ -32,8 +33,4 @@ struct CodegBackground: View {
         }
         .ignoresSafeArea()
     }
-}
-
-#Preview {
-    CodegBackground()
 }

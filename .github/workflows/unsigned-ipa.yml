@@ -1,0 +1,66 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ios16-compat-unsigned-ipa
+
+jobs:
+  build:
+    name: Build iOS 16 unsigned IPA
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcodebuild -showsdks
+
+      - name: Install XcodeGen
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+
+      - name: Generate Xcode project
+        run: |
+          set -euo pipefail
+          xcodegen generate
+
+      - name: Build unsigned device archive
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          xcodebuild \
+            -project CodegiOS.xcodeproj \
+            -scheme CodegiOS \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$PWD/build/CodegiOS.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            archive
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          ROOT="$PWD"
+          APP_PATH="$ROOT/build/CodegiOS.xcarchive/Products/Applications/Codeg.app"
+          test -d "$APP_PATH"
+          rm -rf "$ROOT/build/ipa"
+          mkdir -p "$ROOT/build/ipa/Payload"
+          cp -R "$APP_PATH" "$ROOT/build/ipa/Payload/"
+          cd "$ROOT/build/ipa"
+          zip -qry "$ROOT/build/Codeg-unsigned.ipa" Payload
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Codeg-unsigned-ipa
+          path: build/Codeg-unsigned.ipa
+          if-no-files-found: error

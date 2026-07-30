@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Backs the agent-options sheet: loads the mode/config catalog + current state
 /// and applies the user's picks.
@@ -22,8 +22,7 @@ import Observation
 /// normalized value). An HTTP error — including a dead connection — reverts and
 /// notices.
 @MainActor
-@Observable
-final class AgentOptionsModel {
+final class AgentOptionsModel: ObservableObject {
 
     enum Phase: Equatable {
         case idle              // not loaded yet — transient; prepare() auto-loads

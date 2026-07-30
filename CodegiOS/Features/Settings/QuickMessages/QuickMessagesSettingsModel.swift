@@ -1,12 +1,11 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Loads and mutates the server's quick-message templates. Mirrors the
 /// list+editor model pattern (`ServerStatusModel`): a `phase` for first load,
 /// stale-data `refreshError` banner, optimistic delete/reorder with rollback.
 @MainActor
-@Observable
-final class QuickMessagesSettingsModel {
+final class QuickMessagesSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

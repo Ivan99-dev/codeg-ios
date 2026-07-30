@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Circular agent avatar showing the per-agent brand icon.
 struct AgentAvatar: View {

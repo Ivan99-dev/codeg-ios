@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Add / Edit / View a single agent skill (Markdown). On edit the content is
 /// fetched on appear; a `readOnly` skill is shown without a Save action. New

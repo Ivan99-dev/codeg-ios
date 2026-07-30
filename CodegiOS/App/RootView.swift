@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// App shell. Adapts to width:
 /// - **Compact** (iPhone): an iOS 26 Liquid Glass `TabView` — Chats · Folders
@@ -39,21 +40,24 @@ struct RootView: View {
         // inherit it. No `.id(...)` — accent/mode changes must not tear down
         // live SessionDetail streams.
         .environment(\.codegAccent, appearance.accent)
-        .environment(appearance)
+        .environmentObject(appearance)
         // App display language: overriding `\.locale` re-resolves every
         // `LocalizedStringKey` live (no `.id(...)` teardown, so live streams
         // survive). `.system` hands back the device locale (a no-op override).
-        .environment(language)
+        .environmentObject(language)
         .environment(\.locale, language.locale)
         .preferredColorScheme(appearance.mode.colorScheme)
         .onOpenURL { model.handle(url: $0) }
-        .onChange(of: horizontalSizeClass, initial: true) { _, size in
+        .onAppear {
+            model.isCompact = horizontalSizeClass == .compact
+        }
+        .onChange(of: horizontalSizeClass) { size in
             model.isCompact = size == .compact
         }
         // If the selected server is edited in place (same UUID, new endpoint),
         // its conversation/folder IDs may no longer be valid — drop them.
         // (Switching servers is handled by AppModel.selectedServerID.didSet.)
-        .onChange(of: model.selectedServer?.urlString) { _, _ in
+        .onChange(of: model.selectedServer?.urlString) { _ in
             model.selectedServerEndpointChanged()
         }
         // App-wide activity pulse: feeds the Activity tab, its sidebar badge,
@@ -183,7 +187,7 @@ struct RootView: View {
                     action: { model.serversSheetPresented = true }
                 )
                 .navigationTitle(model.selectedServer?.name ?? "Codeg")
-                .toolbarTitleDisplayMode(.inlineLarge)
+                .toolbarTitleDisplayMode(.inline)
                 .toolbarTitleMenu { serverSwitcherMenu }
             } else {
                 // No server selected (e.g. the active server was just deleted).
@@ -407,7 +411,7 @@ struct RootView: View {
 /// menu, and a gear presenting Settings as a sheet. (Settings was previously
 /// unreachable on iPad.)
 private struct SplitSidebar: View {
-    @Bindable var model: AppModel
+    @ObservedObject var model: AppModel
 
     var body: some View {
         List(selection: $model.sidebarSection) {
@@ -433,7 +437,7 @@ private struct SplitSidebar: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     model.settingsPath = []
                     model.settingsSheetPresented = true
@@ -508,8 +512,4 @@ struct ColumnPlaceholder: View {
             EmptyStateView(icon: icon, title: title, message: message, actionTitle: actionTitle, action: action)
         }
     }
-}
-
-#Preview {
-    RootView().preferredColorScheme(.dark)
 }

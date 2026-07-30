@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A project/workspace on a codeg server (Rust `FolderDetail`). The iOS app
 /// treats folders as a filter dimension under a server, and uses `path` as the

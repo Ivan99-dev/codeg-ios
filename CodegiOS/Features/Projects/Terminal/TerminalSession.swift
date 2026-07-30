@@ -1,5 +1,7 @@
 import Foundation
+import Combine
 import SwiftUI
+import Combine
 import SwiftTerm
 
 /// Drives one server-side PTY for a folder: owns the native ``SwiftTerm/TerminalView``
@@ -19,8 +21,7 @@ import SwiftTerm
 /// `Sendable` ``TerminalRuntime`` box held as a `let`, so the non-isolated
 /// `deinit` can release them and kill the PTY without touching MainActor state.
 @MainActor
-@Observable
-final class TerminalSession {
+final class TerminalSession: ObservableObject {
     enum Phase: Equatable {
         case idle          // not started yet (lazy — first appearance of the tab)
         case connecting    // socket opening / awaiting ready / spawning

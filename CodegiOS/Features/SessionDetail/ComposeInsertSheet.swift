@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The "+" menu's insert picker: a searchable list for one of Quick Messages /
 /// Expert Skills / Slash Commands. Selecting a row emits a pure draft transform
@@ -23,14 +24,13 @@ struct ComposeInsertSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Cancel") { dismiss() }.foregroundStyle(Theme.accent)
                 }
             }
             .searchable(text: $search, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search")
         }
         .presentationDetents([.medium, .large])
-        .presentationBackground(Theme.bg)
         .task { model.load(source) }
     }
 
@@ -174,7 +174,7 @@ struct ComposeInsertSheet: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 Button("Try Again") { model.load(source) }
-                    .buttonStyle(.glass)
+                    .buttonStyle(.bordered)
                     .tint(Theme.accent)
             }
             .padding(.horizontal, 32)

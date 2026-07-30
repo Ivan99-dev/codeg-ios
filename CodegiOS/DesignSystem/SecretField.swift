@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// A masked secret entry with a reveal toggle — used for every agent API key /
 /// token (claude/codex/gemini/cline/opencode/openclaw). Mirrors the web's
@@ -24,7 +25,7 @@ struct SecretField: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled(true)
             .textContentType(.password)
-            .onChange(of: text) { _, _ in onCommit?() }
+            .onChange(of: text) { _ in onCommit?() }
 
             if !text.isEmpty {
                 Button {

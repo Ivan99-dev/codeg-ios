@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Built-in expert categories in the web's fixed pipeline order, with display
 /// labels — mirrors the web's `CATEGORY_SORT` (experts-settings.tsx). The catalog
@@ -33,8 +33,7 @@ enum ExpertCategory {
 /// agents (for the per-expert link matrix). Read-only at this level; linking
 /// happens in `ExpertDetailModel`.
 @MainActor
-@Observable
-final class ExpertsSettingsModel {
+final class ExpertsSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

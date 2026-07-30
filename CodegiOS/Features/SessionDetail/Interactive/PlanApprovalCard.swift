@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The inline card for Grok's native `exit_plan_mode`. When the agent finishes
 /// planning it BLOCKS on the user's decision, so this is pinned above the compose

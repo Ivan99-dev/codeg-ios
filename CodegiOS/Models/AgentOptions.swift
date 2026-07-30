@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// The agent's configurable options as enumerated by `acp_describe_agent_options`
 /// (Rust `AgentOptionsSnapshot`). Decode-only.

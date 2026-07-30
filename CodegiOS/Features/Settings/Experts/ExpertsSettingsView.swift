@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Built-in expert skill packs, grouped by category in workflow order. Tapping
 /// one opens its detail (markdown preview + per-agent enable/disable matrix).

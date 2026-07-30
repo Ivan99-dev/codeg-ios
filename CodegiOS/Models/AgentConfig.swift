@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Per-agent-type configuration codec, ported from the web `acp-agent-settings.tsx`.
 // The web keeps `configText` (config.json) + `envText` (flat env) as the source of

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // MARK: - Scroll action (environment)
 
@@ -268,7 +269,6 @@ struct TranscriptView<Header: View>: View {
             // Let the 1pt anchor row actually be 1pt (List's default min row
             // height would otherwise pad it to ~44).
             .environment(\.defaultMinListRowHeight, 1)
-            .defaultScrollAnchor(.bottom)
             .scrollDismissesKeyboard(.interactively)
             // Publish a scroll capability so a reply's "scroll to question" button
             // (deep inside a row) can move the viewport to the user message.
@@ -304,7 +304,7 @@ struct TranscriptView<Header: View>: View {
             // Streamed growth: follow instantly, but ONLY while pinned. A single
             // plain `scrollTo` per tick (no re-assert) — the content is already
             // moving, so anything heavier stacks and stutters.
-            .onChange(of: scrollTick) { _, _ in
+            .onChange(of: scrollTick) { _ in
                 guard stuckToBottom else { return }
                 proxy.scrollTo(bottomAnchor, anchor: .bottom)
             }
@@ -313,7 +313,7 @@ struct TranscriptView<Header: View>: View {
             // re-asserts on the next runloop: the first pass can stop short when
             // rich content (code blocks / markdown) is still measuring taller, so
             // a far jump would otherwise land above the true bottom.
-            .onChange(of: stickTick) { _, _ in
+            .onChange(of: stickTick) { _ in
                 stuckToBottom = true
                 onPinnedChange(true)
                 scrollToBottom(proxy)

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The folder detail's **Terminal** tab: a slim status/control strip over a
 /// full-bleed native terminal, with connecting / exited / failed states. The

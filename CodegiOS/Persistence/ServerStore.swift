@@ -1,12 +1,11 @@
 import Foundation
-import Observation
+import Combine
 
 /// Observable store of saved server profiles. Owns persistence (UserDefaults
 /// for metadata, Keychain for tokens) and vends `CodegClient`s. Main-actor
 /// isolated since it backs SwiftUI state.
 @MainActor
-@Observable
-final class ServerStore {
+final class ServerStore: ObservableObject {
     private(set) var servers: [ServerProfile]
 
     private let defaults: UserDefaults

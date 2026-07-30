@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The git branch selector, pushed from the agent options sheet. Lists the
 /// folder's local + remote branches (searchable), checks one out on tap, and can
@@ -158,7 +159,7 @@ struct BranchPickerView: View {
                 }
             }
             .padding(14)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+            .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
             .hairlineBorder(Theme.Radius.md)
         } else {
             Button { showNewBranch = true } label: {
@@ -175,7 +176,7 @@ struct BranchPickerView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+            .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
             .hairlineBorder(Theme.Radius.md)
         }
     }

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Markdown skill files per agent. A pinned agent selector at the top (a dropdown
 /// on a material strip) chooses whose skills to show; below it the selected agent's
@@ -44,7 +45,7 @@ struct SkillsSettingsView: View {
         .navigationTitle("Skills")
         .navigationBarTitleDisplayMode(horizontalSizeClass == .compact ? .large : .automatic)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 if model.selectedAgent != nil, model.result?.supported == true {
                     Button { editorRoute = .add } label: { Image(systemName: "plus") }
                         .tint(Theme.accent)

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // Hermes config. Unlike the others, hermes saves through its own endpoint
 // (`acp_update_hermes_config`) and its `config_json` is a backend PROJECTION

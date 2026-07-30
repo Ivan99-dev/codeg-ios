@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// One rendered line of a diff.
 struct DiffRow: Identifiable {

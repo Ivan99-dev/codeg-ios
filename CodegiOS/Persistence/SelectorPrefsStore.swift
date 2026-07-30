@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// One agent's remembered "selector" choices: its last-used mode + per-option
 /// config values. Mirrors the codeg web client's persisted shape.

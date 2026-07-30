@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Expert detail: a markdown preview of the expert's content and a per-agent
 /// enable/disable matrix (link / unlink the expert into each agent's skills).
@@ -221,8 +221,7 @@ private struct CategoryPill: View {
 
 /// Loads an expert's markdown content + per-agent link state, and links/unlinks.
 @MainActor
-@Observable
-final class ExpertDetailModel {
+final class ExpertDetailModel: ObservableObject {
     let expertId: String
     private let client: CodegClient?
 

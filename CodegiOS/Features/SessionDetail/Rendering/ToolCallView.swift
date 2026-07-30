@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // This file owns the tool-call cards (`ToolCallCard` / `ToolGroupCard`) and their
 // per-tool input/output bodies. The transcript timeline renders these directly as

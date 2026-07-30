@@ -1,5 +1,5 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Backs the compose-bar "+" menu's three insert sources — Quick Messages,
 /// Expert Skills, and Slash Commands — mirroring the web client's add-menu
@@ -7,8 +7,7 @@ import Observation
 /// closures the owner wires to `CodegClient`; selecting an item produces a pure
 /// draft transform applied by the compose bar.
 @MainActor
-@Observable
-final class ComposeInsertModel {
+final class ComposeInsertModel: ObservableObject {
 
     /// The three text-insert sources in the "+" menu.
     enum Source: String, Identifiable, CaseIterable {

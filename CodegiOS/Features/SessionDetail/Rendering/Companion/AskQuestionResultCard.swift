@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // Read-only, in-stream rendering of an `ask_user_question` tool call (historical
 // transcript + the in-flight marker). Mirrors web `ask-question-result-card.tsx`:

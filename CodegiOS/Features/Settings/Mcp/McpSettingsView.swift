@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Installed MCP servers: each row shows the server id and which agent apps it's
 /// enabled for. Add/edit a server (id + JSON spec + per-app toggles); delete.
@@ -30,7 +31,7 @@ struct McpSettingsView: View {
         }
         .screenTitle("MCP", compact: horizontalSizeClass == .compact)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 Button { editorRoute = .add } label: { Image(systemName: "plus") }
                     .tint(Theme.accent)
                     .accessibilityLabel("Add MCP Server")

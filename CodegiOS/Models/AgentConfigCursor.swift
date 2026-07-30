@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Cursor (`cursor-agent` CLI) settings logic, ported from the web
 /// `src/components/settings/cursor-config-panel.tsx`. Kept out of the view so the

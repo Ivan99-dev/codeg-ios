@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Classifies the codeg-mcp "companion" tool calls an agent emits when it
 // delegates work or asks the user a question, so each gets a dedicated card

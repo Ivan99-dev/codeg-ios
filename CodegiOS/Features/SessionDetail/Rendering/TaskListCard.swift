@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // The card for a `.taskGroup` timeline node: a run of consecutive
 // `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` calls rendered as one

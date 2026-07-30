@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 // Kimi Code (Moonshot AI) config model — ported from the web
 // `acp-agent-settings.tsx` Kimi helpers. `kimi acp` gates every session on a

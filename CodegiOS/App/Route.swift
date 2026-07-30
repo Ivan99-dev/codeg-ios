@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// The five top-level tabs of the compact (iPhone) shell: four content tabs
 /// plus the system search tab (rendered by iOS 26 as the separated glass

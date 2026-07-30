@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // Dedicated cards for the delegation companion tools, mirroring the web client's
 // `delegated-sub-thread.tsx`, `delegation-status-*.tsx`, and

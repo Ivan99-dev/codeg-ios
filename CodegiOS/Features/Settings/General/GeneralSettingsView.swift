@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// General settings: multi-agent delegation (enable + depth + completed-result
 /// cache budget) and the conversation tools (live feedback, ask-user questions).
@@ -49,7 +50,7 @@ struct GeneralSettingsView: View {
                 .padding(.horizontal, Theme.Layout.screenHMargin)
                 .padding(.top, 8)
                 .padding(.bottom, 32)
-                .animation(.snappy(duration: 0.28), value: model.delegationEnabled)
+                .animation(.easeInOut(duration: 0.28), value: model.delegationEnabled)
             }
             .scrollContentBackground(.hidden)
         }

@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Role of a rendered turn (Rust `TurnRole`).
 enum TurnRole: String, Codable, Hashable, Sendable {

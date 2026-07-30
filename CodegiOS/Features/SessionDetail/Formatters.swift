@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Compact token-count formatting: 980 → "980", 12_300 → "12.3k", 1_400_000 → "1.4M".
 enum TokenFormat {

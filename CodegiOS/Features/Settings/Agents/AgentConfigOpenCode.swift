@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // OpenCode structured editor: main/small model + a list of providers, each with
 // name / npm / base URL / API key and a nested model map. The API key dual-writes

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The session header: a flat card carrying identity (title, agent, status),
 /// the model + git branch, and a compact token / context-window readout

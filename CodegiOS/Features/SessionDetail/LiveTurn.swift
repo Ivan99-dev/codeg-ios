@@ -1,12 +1,11 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// The streaming state of a single in-flight tool call, keyed by its ACP tool
 /// id. Mutated in place as `tool_call_update` events arrive so the UI updates
 /// granularly without rebuilding the whole turn.
 @MainActor
-@Observable
-final class LiveToolCall: Identifiable {
+final class LiveToolCall: Identifiable, ObservableObject {
     nonisolated let id: String
     var title: String
     var kind: String
@@ -92,8 +91,7 @@ enum LiveSegment: Identifiable {
 /// would be O(n²) main-thread work. The raw `buffer` is always current (so
 /// snapshots never lose the tail); `text` trails it by up to one coalesce window.
 @MainActor
-@Observable
-final class LiveTextRun: Identifiable {
+final class LiveTextRun: Identifiable, ObservableObject {
     nonisolated let id = UUID().uuidString
 
     /// What views render. Published at most ~every 50ms while streaming.
@@ -161,8 +159,7 @@ final class LiveTextRun: Identifiable {
 /// streaming. Built optimistically when the user sends, mutated as ACP events
 /// arrive, then converted to an immutable `MessageTurn` on completion.
 @MainActor
-@Observable
-final class LiveTurn: Identifiable {
+final class LiveTurn: Identifiable, ObservableObject {
     nonisolated let id: String
     private(set) var segments: [LiveSegment] = []
     /// Tool-call lookup so `tool_call_update` finds its target in O(1).

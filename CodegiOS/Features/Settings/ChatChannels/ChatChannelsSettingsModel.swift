@@ -1,11 +1,10 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Loads + manages chat channels: the channel list joined with live connection
 /// status, plus create/update (incl. keyring token) and optimistic delete.
 @MainActor
-@Observable
-final class ChatChannelsSettingsModel {
+final class ChatChannelsSettingsModel: ObservableObject {
     enum Phase: Equatable { case loading, loaded, failed(String) }
 
     private(set) var phase: Phase = .loading

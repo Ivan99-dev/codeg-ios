@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Centered empty-state with an optional primary action.
 struct EmptyStateView: View {
@@ -26,7 +27,7 @@ struct EmptyStateView: View {
             }
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
-                    .buttonStyle(.glass)
+                    .buttonStyle(.bordered)
                     .tint(Theme.accent)
                     .padding(.top, 4)
             }
@@ -83,8 +84,8 @@ struct RefreshErrorBanner: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
-        .glassEffect(
-            .regular.tint(Theme.danger.opacity(0.16)),
+        .background(
+            Theme.danger.opacity(0.12),
             in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
         )
         .hairlineBorder(Theme.Radius.md, color: Theme.danger.opacity(0.35))
@@ -110,7 +111,7 @@ struct InlineErrorView: View {
                 .multilineTextAlignment(.center)
             if let retry {
                 Button("Try Again", action: retry)
-                    .buttonStyle(.glass)
+                    .buttonStyle(.bordered)
                     .tint(Theme.accent)
                     .padding(.top, 4)
             }

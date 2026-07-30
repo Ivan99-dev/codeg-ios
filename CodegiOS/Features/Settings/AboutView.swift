@@ -1,12 +1,11 @@
 import SwiftUI
-import Observation
+import Combine
 
 /// Fetches the connected server's reported version via the `health` endpoint so
 /// Settings/About can show a live number rather than a hardcoded one. Mirrors
 /// `ServerStatusModel`'s probe style but for a single, on-demand lookup.
 @MainActor
-@Observable
-final class ServerVersionModel {
+final class ServerVersionModel: ObservableObject {
     enum State: Equatable {
         case idle
         case loading

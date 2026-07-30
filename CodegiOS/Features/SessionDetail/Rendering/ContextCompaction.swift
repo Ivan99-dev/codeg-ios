@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Context-compaction tool-call detection (port of the web `lib/context-compaction.ts`).
 ///

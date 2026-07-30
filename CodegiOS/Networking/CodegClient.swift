@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// HTTP client for a single codeg server. Value type — cheap to create per
 /// request; holds the resolved base URL + bearer token. All endpoints are

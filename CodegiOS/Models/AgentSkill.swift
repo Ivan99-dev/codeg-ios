@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Per-agent skill files (CLAUDE.md / SKILL.md), at global or project scope.
 /// Mirrors the server's agent-skill types. Scope/layout are string enum *values*

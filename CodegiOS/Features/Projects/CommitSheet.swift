@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// The commit composer, presented as a sheet from the Changes tab. Lists the
 /// working-tree changes with per-file selection (tracked auto-selected, untracked

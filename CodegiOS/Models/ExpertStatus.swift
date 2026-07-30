@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 /// Per-agent link state of a built-in expert (`experts_get_install_status` /
 /// `experts_link_to_agent`). `ExpertListItem` / `ExpertMetadata` already exist in

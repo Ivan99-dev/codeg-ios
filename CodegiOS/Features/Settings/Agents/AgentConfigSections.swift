@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // Per-agent-type structured config forms. Each binds to the shared `AgentDraft`
 // and calls `draft.reapply(_:)` after every edit so the raw config/env (and the
@@ -85,7 +86,10 @@ struct ClaudeConfigSection: View {
         // Expand once any tier value exists — also catches `providers` loading
         // async after first appear (provider mode), not just the initial render.
         // Only ever opens (never force-collapses a user's manual toggle).
-        .onChange(of: hasTierValues, initial: true) { _, hasValues in
+        .onAppear {
+            if hasTierValues { showTierModels = true }
+        }
+        .onChange(of: hasTierValues) { hasValues in
             if hasValues { showTierModels = true }
         }
     }
@@ -132,7 +136,7 @@ struct ClaudeConfigSection: View {
 
     // Collapsible header row for the three per-tier default models.
     private var tierDisclosureRow: some View {
-        Button { withAnimation(.snappy(duration: 0.2)) { showTierModels.toggle() } } label: {
+        Button { withAnimation(.easeInOut(duration: 0.2)) { showTierModels.toggle() } } label: {
             HStack(spacing: 8) {
                 Text("Default Models by Tier").foregroundStyle(Theme.textPrimary)
                 Spacer(minLength: 8)

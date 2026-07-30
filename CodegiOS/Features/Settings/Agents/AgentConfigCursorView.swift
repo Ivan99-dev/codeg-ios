@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// Cursor settings panel (ported from the web `CursorConfigPanel`).
 ///

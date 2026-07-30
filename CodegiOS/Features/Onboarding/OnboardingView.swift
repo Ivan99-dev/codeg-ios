@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 /// First-launch screen shown while no server is saved: the value proposition
 /// plus a single call to action that opens the (reused) server editor. Replaces
@@ -20,7 +21,7 @@ struct OnboardingView: View {
                     .font(.system(size: 34, weight: .semibold))
                     .foregroundStyle(Theme.accent)
                     .frame(width: 84, height: 84)
-                    .glassEffect(.regular.tint(Theme.accentDim), in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
+                    .background(Theme.accentDim, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
                     .hairlineBorder(Theme.Radius.xl, color: Theme.accent.opacity(0.3))
                     .padding(.bottom, 24)
 
