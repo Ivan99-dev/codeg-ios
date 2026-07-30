@@ -32,7 +32,15 @@ struct AgentsSettingsView: View {
         }
         .overlay(alignment: .bottom) { toastView }
         .animation(.easeInOut(duration: 0.25), value: model.toast)
+        .background { agentNavigationLink }
         .task { await model.load() }
+    }
+
+    private var pushedAgentIsActive: Binding<Bool> {
+        Binding(
+            get: { pushedAgentType != nil },
+            set: { if !$0 { pushedAgentType = nil } }
+        )
     }
 
     @ViewBuilder
@@ -69,15 +77,21 @@ struct AgentsSettingsView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .refreshable { await model.load() }
-            // Row content taps set `pushedAgent`; this drives the push (an explicit
-            // item destination, so the row's trailing Toggle stays independent of
-            // navigation — a NavigationLink label would swallow the toggle's taps).
-            // Push by agent type; the detail reads the LIVE agent from the model so
-            // a save/install reload is reflected without a stale snapshot.
-            .navigationDestination(item: $pushedAgentType) { type in
-                AgentDetailView(model: model, agentType: type, client: client)
-            }
         }
+    }
+
+    @ViewBuilder
+    private var agentNavigationLink: some View {
+        NavigationLink(isActive: pushedAgentIsActive) {
+            if let type = pushedAgentType {
+                AgentDetailView(model: model, agentType: type, client: client)
+            } else {
+                EmptyView()
+            }
+        } label: {
+            EmptyView()
+        }
+        .hidden()
     }
 
     @ViewBuilder

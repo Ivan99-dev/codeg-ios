@@ -38,8 +38,7 @@ struct SessionListView: View {
     @State private var searchText = ""
     /// The group currently zoom-expanded to fullscreen, or `nil`.
     @State private var expandedSection: ChatExpand?
-    /// Shared namespace pairing each card's `matchedTransitionSource` with the
-    /// fullscreen's `.navigationTransition(.zoom)`.
+    /// Shared namespace previously used by iOS 18's zoom transition.
     @Namespace private var cardNS
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
@@ -92,7 +91,7 @@ struct SessionListView: View {
         // suppress the system (centered) title to avoid a duplicate; on iPad the
         // plain server name is the column title.
         .navigationTitle(serverSwitcher == nil ? server.name : "")
-        .toolbarTitleDisplayMode(serverSwitcher == nil ? .automatic : .inline)
+        .navigationBarTitleDisplayMode(serverSwitcher == nil ? .automatic : .inline)
         .toolbar {
             if let serverSwitcher {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -238,7 +237,6 @@ struct SessionListView: View {
             folderName: { showFolder ? viewModel.folderNames[$0.folderId] : nil },
             onExpand: { expandedSection = section }
         )
-        .matchedTransitionSource(id: section.id, in: cardNS)
         .padding(.horizontal, Theme.Layout.screenHMargin)
     }
 
@@ -286,7 +284,6 @@ struct SessionListView: View {
             onTogglePin: { conv in togglePin(conv) },
             onClose: { expandedSection = nil }
         )
-        .navigationTransition(.zoom(sourceID: section.id, in: cardNS))
     }
 
     /// Live-reads the section's current rows from the view model (never a frozen

@@ -96,33 +96,36 @@ struct RootView: View {
             // tab bar auto-fills any symbol with a `.fill` variant, which made
             // `message`/`folder`/`gearshape` read as solid color blocks; the
             // helper forces every icon to stay a stroke-only outline.
-            Tab(value: AppTab.chats) {
-                chatsTab
-            } label: {
+            chatsTab
+            .tabItem {
                 linearTabLabel("Chats", "message")
             }
-            Tab(value: AppTab.projects) {
-                projectsTab
-            } label: {
+            .tag(AppTab.chats)
+
+            projectsTab
+            .tabItem {
                 linearTabLabel("Folders", "folder")
             }
-            Tab(value: AppTab.activity) {
-                activityTab
-            } label: {
+            .tag(AppTab.projects)
+
+            activityTab
+            .tabItem {
                 linearTabLabel("Activity", "waveform")
             }
-            // Running-task count rides the Activity tab as a badge (0 auto-hides).
+            .tag(AppTab.activity)
             .badge(model.activity.running.count)
-            Tab(value: AppTab.search) {
-                searchTab
-            } label: {
+
+            searchTab
+            .tabItem {
                 linearTabLabel("Search", "magnifyingglass")
             }
-            Tab(value: AppTab.settings) {
-                settingsTab
-            } label: {
+            .tag(AppTab.search)
+
+            settingsTab
+            .tabItem {
                 linearTabLabel("Settings", "gearshape")
             }
+            .tag(AppTab.settings)
         }
     }
 
@@ -187,7 +190,7 @@ struct RootView: View {
                     action: { model.serversSheetPresented = true }
                 )
                 .navigationTitle(model.selectedServer?.name ?? "Codeg")
-                .toolbarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbarTitleMenu { serverSwitcherMenu }
             } else {
                 // No server selected (e.g. the active server was just deleted).

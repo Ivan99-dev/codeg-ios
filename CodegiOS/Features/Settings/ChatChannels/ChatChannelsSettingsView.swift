@@ -34,14 +34,7 @@ struct ChatChannelsSettingsView: View {
                     .accessibilityLabel("Add Channel")
             }
         }
-        // Row content taps set `pushedChannel` (an explicit item destination), so
-        // the row's trailing enable Toggle stays independent of navigation — a
-        // NavigationLink label would swallow the toggle's taps.
-        .navigationDestination(item: $pushedChannel) { channel in
-            ChatChannelDetailView(channel: channel, client: client) {
-                Task { await model.load() }
-            }
-        }
+        .background { channelNavigationLink }
         .sheet(isPresented: $showAdd) {
             ChatChannelEditorSheet(editing: nil, client: client) { name, type, configJson, enabled, daily, dailyTime, token in
                 try await model.create(name: name, type: type, configJson: configJson, enabled: enabled, dailyReportEnabled: daily, dailyReportTime: dailyTime, token: token)
@@ -64,6 +57,29 @@ struct ChatChannelsSettingsView: View {
         .overlay(alignment: .bottom) { toastView }
         .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
+    }
+
+    private var pushedChannelIsActive: Binding<Bool> {
+        Binding(
+            get: { pushedChannel != nil },
+            set: { if !$0 { pushedChannel = nil } }
+        )
+    }
+
+    @ViewBuilder
+    private var channelNavigationLink: some View {
+        NavigationLink(isActive: pushedChannelIsActive) {
+            if let channel = pushedChannel {
+                ChatChannelDetailView(channel: channel, client: client) {
+                    Task { await model.load() }
+                }
+            } else {
+                EmptyView()
+            }
+        } label: {
+            EmptyView()
+        }
+        .hidden()
     }
 
     @ViewBuilder

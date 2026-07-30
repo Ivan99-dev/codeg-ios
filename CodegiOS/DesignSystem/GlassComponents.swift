@@ -163,7 +163,7 @@ extension View {
             // separate large-title band above it.
             self
                 .navigationTitle(title)
-                .toolbarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.inline)
         } else {
             self.navigationTitle(title)
         }

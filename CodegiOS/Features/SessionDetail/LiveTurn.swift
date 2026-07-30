@@ -100,9 +100,9 @@ final class LiveTextRun: Identifiable, ObservableObject {
     /// The full accumulated text, updated synchronously on every delta. NOT
     /// observed, so appends don't invalidate views between flushes; read via
     /// `fullText` for snapshotting.
-    @ObservationIgnored private var buffer: String
+    private var buffer: String
     /// Pending coalesce task; non-nil means a flush is already scheduled.
-    @ObservationIgnored private var flushTask: Task<Void, Never>?
+    private var flushTask: Task<Void, Never>?
 
     /// Coalesce window for streamed text, scaled with the accumulated length. Each
     /// flush re-parses the whole buffer (block Markdown), which is ~O(n), so a fixed

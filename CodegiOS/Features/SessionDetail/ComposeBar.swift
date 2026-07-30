@@ -57,29 +57,27 @@ struct ComposeBar: View {
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
 
-            GlassEffectContainer(spacing: 8) {
-                HStack(alignment: .bottom, spacing: 8) {
-                    addButton
-                    TextField("Message", text: $text, axis: .vertical)
-                        .textInputAutocapitalization(.sentences)
-                        .lineLimit(1...6)
-                        // Match the transcript body so the text you type reads at
-                        // the same size as the reply it produces (was `.callout`,
-                        // visibly smaller than the messages).
-                        .font(Theme.Typography.messageBody)
-                        .foregroundStyle(Theme.textPrimary)
-                        .tint(Theme.accent)
-                        .focused($focused)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
-                        // `xl` radius clamps to a capsule while the field is one
-                        // line (rhyming with the round +/send buttons) and relaxes
-                        // to a rounded rect as it grows — no hard switch needed.
-                        .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
-                        .hairlineBorder(Theme.Radius.xl)
+            HStack(alignment: .bottom, spacing: 8) {
+                addButton
+                TextField("Message", text: $text, axis: .vertical)
+                    .textInputAutocapitalization(.sentences)
+                    .lineLimit(1...6)
+                    // Match the transcript body so the text you type reads at
+                    // the same size as the reply it produces (was `.callout`,
+                    // visibly smaller than the messages).
+                    .font(Theme.Typography.messageBody)
+                    .foregroundStyle(Theme.textPrimary)
+                    .tint(Theme.accent)
+                    .focused($focused)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    // `xl` radius clamps to a capsule while the field is one
+                    // line (rhyming with the round +/send buttons) and relaxes
+                    // to a rounded rect as it grows — no hard switch needed.
+                    .background(Theme.bgElevated, in: RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous))
+                    .hairlineBorder(Theme.Radius.xl)
 
-                    actionButton
-                }
+                actionButton
             }
         }
         // Idle, the bar floats as a narrower pill (36pt side margins) so it reads

@@ -88,7 +88,6 @@ struct PlanApprovalCard: View {
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { planHeight = $0 }
             }
             .frame(height: min(max(planHeight, 1), Self.maxPlanHeight))
-            .scrollBounceBehavior(.basedOnSize)
         }
     }
 

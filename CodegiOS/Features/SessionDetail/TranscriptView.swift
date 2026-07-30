@@ -277,30 +277,8 @@ struct TranscriptView<Header: View>: View {
                     proxy.scrollTo(id, anchor: anchor)
                 }
             })
-            // Track bottom-proximity. Mapping geometry to a Bool means `action`
-            // only fires when we cross the threshold (not every scroll pixel).
-            // `contentInsets.bottom` keeps the math correct across keyboard /
-            // compose-bar inset changes.
-            .onScrollGeometryChange(for: Bool.self) { geo in
-                geo.contentSize.height
-                    - (geo.contentOffset.y + geo.containerSize.height - geo.contentInsets.bottom)
-                    <= bottomThreshold
-            } action: { _, atBottom in
-                stuckToBottom = atBottom
-                onPinnedChange(atBottom)
-            }
-            // Reveal older turns as the user scrolls toward the top. Mapped to a
-            // Bool so `action` fires only when crossing into the near-top zone (not
-            // every pixel); inserting rows above shifts the user out of the zone, so
-            // it re-arms naturally for the next page on the next upward scroll.
-            .onScrollGeometryChange(for: Bool.self) { geo in
-                (geo.contentOffset.y + geo.contentInsets.top) < loadEarlierThreshold
-            } action: { _, nearTop in
-                // `!stuckToBottom` rejects the transient near-top geometry reported
-                // while the list is still settling onto the bottom anchor at open —
-                // otherwise a fresh open would immediately page in older history.
-                if nearTop, !stuckToBottom, !headLoaded, !isLoadingEarlier { loadEarlier() }
-            }
+            // iOS 16 has no `onScrollGeometryChange`, so bottom-proximity and
+            // near-top paging fall back to explicit repin actions.
             // Streamed growth: follow instantly, but ONLY while pinned. A single
             // plain `scrollTo` per tick (no re-assert) — the content is already
             // moving, so anything heavier stacks and stutters.
