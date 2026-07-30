@@ -29,9 +29,7 @@ struct ChatChannelsSettingsView: View {
         .navigationBarTitleDisplayMode(horizontalSizeClass == .compact ? .large : .automatic)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showAdd = true } label: { Image(systemName: "plus") }
-                    .tint(Theme.accent)
-                    .accessibilityLabel("Add Channel")
+                addChannelButton
             }
         }
         .background { channelNavigationLink }
@@ -57,6 +55,14 @@ struct ChatChannelsSettingsView: View {
         .overlay(alignment: .bottom) { toastView }
         .animation(.easeInOut(duration: 0.25), value: model.toast)
         .task { await model.load() }
+    }
+
+    private var addChannelButton: some View {
+        Button(action: { showAdd = true }) {
+            Image(systemName: "plus")
+        }
+        .tint(Theme.accent)
+        .accessibilityLabel("Add Channel")
     }
 
     private var pushedChannelIsActive: Binding<Bool> {

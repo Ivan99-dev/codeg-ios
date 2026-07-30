@@ -69,7 +69,8 @@ struct McpServerEditorSheet: View {
                             }
                         }
                         EditorSection(title: "Enabled For", footer: selectedApps.isEmpty ? "Select at least one app." : "Which agents this MCP server is available to.") {
-                            ForEach(Array(McpAppType.allCases.enumerated()), id: \.element) { index, app in
+                            ForEach(McpAppType.allCases.indices, id: \.self) { index in
+                                let app = McpAppType.allCases[index]
                                 if index > 0 { Divider().overlay(Theme.hairline).padding(.leading, 16) }
                                 Toggle(isOn: Binding(
                                     get: { selectedApps.contains(app) },

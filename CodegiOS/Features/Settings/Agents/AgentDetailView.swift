@@ -78,12 +78,7 @@ struct AgentDetailView: View {
             // Kimi & Pi own their save buttons inside their panels (dedicated
             // backends, multiple independent saves) — no single host "Save".
             if hostSaveShown {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") { save() }
-                        .fontWeight(.semibold)
-                        .tint(Theme.accent)
-                        .disabled(isSaving || togglingEnabled || isInstalling || agent == nil)
-                }
+                ToolbarItem(placement: .confirmationAction) { saveButton }
             }
         }
         .task {
@@ -115,6 +110,17 @@ struct AgentDetailView: View {
         } message: {
             Text("This removes the locally installed binary. You can reinstall it any time.")
         }
+    }
+
+    private var saveDisabled: Bool {
+        isSaving || togglingEnabled || isInstalling || agent == nil
+    }
+
+    private var saveButton: some View {
+        Button("Save", action: save)
+            .fontWeight(.semibold)
+            .tint(Theme.accent)
+            .disabled(saveDisabled)
     }
 
     private func content(_ agent: AcpAgentInfo) -> some View {

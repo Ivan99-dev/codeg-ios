@@ -71,13 +71,13 @@ enum Theme {
     // honoring light/dark per palette. A single dynamic color: no mutable global,
     // no per-call-site change, updates live when `\.codegAccent` is set.
     static let accent = Color(UIColor { tc in
-        UIColor(tc.accentPalette.fill(dark: tc.userInterfaceStyle != .light))
+        UIColor(AccentPalette.neutral.fill(dark: tc.userInterfaceStyle != .light))
     })
     /// The legible content color to place ON an accent fill (text/icons inside a
     /// filled chip or prominent button). Derived from the accent's luminance, so
     /// it stays readable across both palettes and both schemes.
     static let onAccent = Color(UIColor { tc in
-        UIColor(tc.accentPalette.onColor(dark: tc.userInterfaceStyle != .light))
+        UIColor(AccentPalette.neutral.onColor(dark: tc.userInterfaceStyle != .light))
     })
     /// A faint accent wash (selection highlights, glass tints).
     static var accentDim: Color { accent.opacity(0.16) }

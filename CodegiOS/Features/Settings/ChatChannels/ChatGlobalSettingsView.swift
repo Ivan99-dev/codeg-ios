@@ -87,7 +87,8 @@ struct ChatGlobalSettingsView: View {
 
     private var eventsSection: some View {
         EditorSection(title: "Forwarded Events", footer: "Which agent events are sent to your channels and webhooks.") {
-            ForEach(Array(ChatEventCatalog.all.enumerated()), id: \.element.id) { index, event in
+            ForEach(ChatEventCatalog.all.indices, id: \.self) { index in
+                let event = ChatEventCatalog.all[index]
                 if index > 0 { Divider().overlay(Theme.hairline) }
                 HStack(alignment: .center, spacing: 8) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -118,7 +119,7 @@ struct ChatGlobalSettingsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16).padding(.vertical, 11)
             }
-            ForEach(model.webhooks) { hook in
+            ForEach(model.webhooks, id: \.id) { hook in
                 HStack(spacing: 8) {
                     // Save-on-change get/set bindings (coalesced) so a typed-but-
                     // unsubmitted URL still persists on navigate-away.
