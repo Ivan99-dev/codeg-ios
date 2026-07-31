@@ -13,12 +13,12 @@ final class ServerEditorModel: ObservableObject {
     }
 
     // Editable fields
-    var name: String
-    var urlString: String
-    var token: String
+    @Published var name: String
+    @Published var urlString: String
+    @Published var token: String
 
-    private(set) var isTesting = false
-    private(set) var testResult: TestResult?
+    @Published private(set) var isTesting = false
+    @Published private(set) var testResult: TestResult?
 
     /// The profile being edited, or nil when adding.
     let editing: ServerProfile?
